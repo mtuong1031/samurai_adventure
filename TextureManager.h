@@ -1,7 +1,6 @@
 #ifndef TEXTUREMANAGER_H
 #define TEXTUREMANAGER_H
 
-#include "game.h"
 #include "CommonFunc.h"
 
 class TextureManager {
@@ -9,7 +8,7 @@ class TextureManager {
         TextureManager();
         ~TextureManager();
         
-        virtual LoadTexture(const char *fileName, SDL_Renderer *ren);
+        virtual bool LoadTexture(const char *fileName, SDL_Renderer *ren);
         void RenderTexture(SDL_Renderer* tex, const SDL_Rect* clip);
         void free();
 

@@ -2,8 +2,9 @@
 #include "CommonFunc.h"
 #include "TextureManager.h"
 #include "character.h"
-TextureManager background;
-Samurai samurai;    
+TextureManager background;    
+ 
+ Samurai samurai;
 
 bool InitData() {  
     bool success = true;
@@ -40,7 +41,7 @@ bool InitData() {
 
 bool loadIMG() {
     bool retb = background.LoadTexture("dune.png", renderer);
-    bool rets = samurai.LoadCharacter("character.png", renderer);
+    bool rets = samurai.LoadCharacter("image/samurai_stand.png", renderer);
     if (rets == false || retb == false) {
         return false;
     }
@@ -67,7 +68,7 @@ int main(int argc, char *argv[] )
     SDL_Surface *tempSurface = IMG_Load("dune.png");
     SDL_Texture *screen = SDL_CreateTextureFromSurface(renderer, tempSurface);
 
-    const int FPS = 60;
+    const int FPS = 12;
     const int frameDelay = 1000 / FPS;
 
     Uint32 frameStart;  
@@ -81,6 +82,10 @@ int main(int argc, char *argv[] )
     if (loadIMG() == false) {
         return -1;
     }
+
+    samurai.setframe();
+    samurai.setframe();
+
     SDL_Event event;
     bool is_quit = false;
     while (!is_quit) {
