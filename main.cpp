@@ -68,7 +68,7 @@ int main(int argc, char *argv[] )
     SDL_Surface *tempSurface = IMG_Load("dune.png");
     SDL_Texture *screen = SDL_CreateTextureFromSurface(renderer, tempSurface);
 
-    const int FPS = 12;
+    const int FPS = 24;
     const int frameDelay = 1000 / FPS;
 
     Uint32 frameStart;  
@@ -83,7 +83,6 @@ int main(int argc, char *argv[] )
         return -1;
     }
 
-    samurai.setframe();
     samurai.setframe();
 
     SDL_Event event;
