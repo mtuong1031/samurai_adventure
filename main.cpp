@@ -40,7 +40,7 @@ bool InitData() {
 }
 
 bool loadIMG() {
-    bool retb = background.LoadTexture("dune.png", renderer);
+    bool retb = background.LoadTexture("ass.png", renderer);
     bool rets = samurai.LoadCharacter("image/samurai_stand.png", renderer);
     if (rets == false || retb == false) {
         return false;
@@ -65,10 +65,10 @@ void close() {
 int main(int argc, char *argv[] ) 
 {
 
-    SDL_Surface *tempSurface = IMG_Load("dune.png");
+    SDL_Surface *tempSurface = IMG_Load("ass.png");
     SDL_Texture *screen = SDL_CreateTextureFromSurface(renderer, tempSurface);
 
-    const int FPS = 24;
+    const int FPS = 30;
     const int frameDelay = 1000 / FPS;
 
     Uint32 frameStart;  
@@ -106,7 +106,6 @@ int main(int argc, char *argv[] )
         samurai.render(renderer);   
 
         SDL_RenderPresent(renderer);    // Cap nhat man hinh
-	
 
 	    frameTime = SDL_GetTicks() - frameStart; // Thời gian mất để render 1 frame 
 

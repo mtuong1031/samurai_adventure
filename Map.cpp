@@ -22,8 +22,8 @@ void Map::LoadMap(const char *name) {
         std::cout << "Khong the mo file" << std::endl;
         return;
     }
-    for (int i = 0; i < 35; i++) {
-        for (int j = 0; j < 40; j++) {
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 30; j++) {
             file >> map[i][j];
         }
     }
@@ -32,8 +32,8 @@ void Map::LoadMap(const char *name) {
 
 void Map::DrawMap(SDL_Renderer *ren) {
     int type = 0;
-    for (int i = 0; i < 35; i++) {
-        for (int j = 0; j < 40; j++) {
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 30; j++) {
             type = map[i][j];
             dest.x = j * 64;
             dest.y = i * 64;

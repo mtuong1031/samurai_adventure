@@ -23,7 +23,7 @@ class Map
         SDL_Texture* water;
         SDL_Texture* rock;
 
-        int map[35][40];
+        int map[20][30];
 }
 
 
