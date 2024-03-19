@@ -2,9 +2,10 @@
 #include "CommonFunc.h"
 #include "TextureManager.h"
 #include "character.h"
+
+Map map;
 TextureManager background;    
- 
- Samurai samurai;
+Samurai samurai;
 
 bool InitData() {  
     bool success = true;
@@ -100,6 +101,9 @@ int main(int argc, char *argv[] )
         SDL_RenderClear(renderer);
         background.RenderTexture(renderer, NULL);
 
+        map.LoadMap("tilemap.txt");
+        map.DrawMap(renderer);
+
 	    frameStart = SDL_GetTicks();
 
         samurai.move();
@@ -117,3 +121,6 @@ int main(int argc, char *argv[] )
 
     return 0;
 }
+
+
+

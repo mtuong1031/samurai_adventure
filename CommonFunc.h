@@ -36,7 +36,7 @@ static SDL_Renderer* renderer = NULL;
 
 #define TILE_SIZE 64
 
-#define MAX_MAP_X 400
+#define MAX_MAP_X 15
 #define MAX_MAP_Y 10
 
 // typedef struct Map{
