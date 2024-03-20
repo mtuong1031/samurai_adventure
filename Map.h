@@ -11,8 +11,9 @@ class Map
     public:
         Map();
         ~Map();
-        int map[20][30];
+        int map[20][60];
         bool LoadObject(const char *fileName, SDL_Renderer* ren);
+        void getMapValue();
         void LoadMap(const char* name);
         void DrawMap (SDL_Renderer* ren);
         int getMapValue(int x, int y) {
@@ -20,12 +21,6 @@ class Map
         }
     private:
         SDL_Rect src, dest;
-
-        //Các thành phần của map
-        SDL_Texture*  sand;
-        SDL_Texture* tree;
-        SDL_Texture* water;
-        SDL_Texture* rock;
 
         SDL_Texture* texture;
 };
