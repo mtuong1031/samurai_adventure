@@ -6,24 +6,29 @@
 #include "TextureManager.h"
 #include <fstream>
 
-class Map 
+#define MAX_TILES 20
+
+class TileMap : public TextureManager
+{
+    public:
+        TileMap() {;}
+        ~TileMap() {;}
+};
+
+class Map
 {
     public:
         Map();
         ~Map();
-        int map[20][60];
-        bool LoadObject(const char *fileName, SDL_Renderer* ren);
-        void getMapValue();
-        void LoadMap(const char* name);
-        void DrawMap (SDL_Renderer* ren);
-        int getMapValue(int x, int y) {
-            return map[y][x]; 
-        }
-    private:
-        SDL_Rect src, dest;
 
-        SDL_Texture* texture;
+        void LoadMap(const char* name);
+        void GetMapTiles(SDL_Renderer* screen);
+        int getMapValue(int x, int y);
+        void DrawMap(SDL_Renderer* screen);
+    private:
+        Map_game mapdata;
+        TileMap tile_map[MAX_TILES];
+        SDL_Rect tile_rect;
 };
 
-
-#endif  
+#endif

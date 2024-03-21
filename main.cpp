@@ -86,6 +86,9 @@ int main(int argc, char *argv[] )
         return -1;
     }
 
+    map.LoadMap("map_tiles_1.txt");
+    map.GetMapTiles(renderer);
+
     SDL_Event event;
     bool is_quit = false;
     while (!is_quit) {
@@ -95,7 +98,7 @@ int main(int argc, char *argv[] )
             }
             samurai.handleEvent(event); 
         }
-        
+
         if (samurai.status == Samurai::ATTACK_R || samurai.status == Samurai::ATTACK_L) {
             samurai.setAttack();
         } else {
@@ -118,13 +121,12 @@ int main(int argc, char *argv[] )
         if (camera.y > SCREEN_H_LEVEL - camera.h) {
             camera.y = SCREEN_H_LEVEL - camera.h;
         }
-
+        
         SDL_SetRenderDrawColor(renderer, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR);
         SDL_RenderClear(renderer);
-        background.RenderTexture(renderer, &camera);
 
-        map.LoadMap("map_tiles_1.txt");
-        map.DrawMap(renderer);
+        background.RenderTexture(renderer, &camera);         
+        map.DrawMap(renderer);             
 
 	    frameStart = SDL_GetTicks();
 

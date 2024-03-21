@@ -3,40 +3,11 @@
 #include "CommonFunc.h"
 Map::Map() {
     renderer = NULL;
-    texture = NULL;
 }
 
 Map::~Map() {
 }
 
-bool Map::LoadObject(const char *fileName, SDL_Renderer *ren) {
-    SDL_Texture* new_texture = NULL; // Bien tam de load hinh anh
-
-    SDL_Surface* tmpsurface = IMG_Load(fileName); 
-
-    if (tmpsurface != NULL) 
-    {
-        new_texture = SDL_CreateTextureFromSurface(ren, tmpsurface); 
-        SDL_FreeSurface(tmpsurface); 
-    } else {
-        std::cout << "Can't load image" << std::endl;
-    }
-
-    texture = new_texture;
-    return texture != NULL;
-}
-
-void Map::getMapValue() {
-    Map::LoadObject("assets/base1.png", renderer);
-    Map::LoadObject("assets/base2.png", renderer);
-    Map::LoadObject("assets/base3.png", renderer);
-    Map::LoadObject("assets/base4.png", renderer);
-    Map::LoadObject("assets/base5.png", renderer);
-    Map::LoadObject("assets/base6.png", renderer);
-    Map::LoadObject("assets/base7.png", renderer);
-    Map::LoadObject("assets/base8.png", renderer);
-    Map::LoadObject("assets/base9.png", renderer);
-}
 
 void Map::LoadMap(const char *name) {
     std::ifstream file(name);
@@ -44,65 +15,82 @@ void Map::LoadMap(const char *name) {
         std::cout << "Can't open file" << std::endl;
         return;
     }
-    for (int i = 0; i < 20; i++) {
-        for (int j = 0; j < 60; j++) {
-            file >> map[i][j];
+    for (int i = 0; i < MAX_MAP_Y; i++) {
+        for (int j = 0; j < MAX_MAP_X; j++) {
+            file >> mapdata.tile[i][j];
+            int val = mapdata.tile[i][j];
+            if (val > 0) {
+                if (i > MAX_MAP_Y) {
+                    mapdata.max_y_ = i;
+                }
+                if (j > MAX_MAP_X) {
+                    mapdata.max_x_ = j;
+                }
+            }
         }
     }
     file.close();
+    
+    mapdata.max_x_ = (mapdata.max_x_ + 1) * TILE_SIZE;
+    mapdata.max_y_ = (mapdata.max_y_ + 1) * TILE_SIZE;
+
+    mapdata.start_x_ = 0;
+    mapdata.start_y_ = 0;
+
 }
 
+void Map::GetMapTiles(SDL_Renderer *renderer) {
+    tile_map[1].LoadTexture("assets/base1.png", renderer);
+    tile_map[2].LoadTexture("assets/base2.png", renderer);
+    tile_map[3].LoadTexture("assets/base3.png", renderer);
+    tile_map[4].LoadTexture("assets/base4.png", renderer);
+    tile_map[5].LoadTexture("assets/base5.png", renderer);
+    tile_map[6].LoadTexture("assets/base6.png", renderer);
+    tile_map[7].LoadTexture("assets/base7.png", renderer);
+    tile_map[8].LoadTexture("assets/base8.png", renderer);
+    tile_map[9].LoadTexture("assets/base9.png", renderer);
+    if (tile_map[1].getTexture() == NULL) {
+        std::cout << "Can't load texture" << std::endl;
+    }
+}
+
+int Map::getMapValue(int x, int y) {
+    int val = 0;
+    val = mapdata.tile[x][y];
+    return val;
+}
 
 void Map::DrawMap(SDL_Renderer *ren) {
-    int type = 0;
-    for (int i = 0; i < 20; i++) {
-        for (int j = 0; j < 60; j++) {
-            type = map[i][j];
-            dest.x = j *32;
-            dest.y = i * 32;
-            dest.w = 32;
-            dest.h = 32;
-            switch (type) {
-                case 1:
-                    LoadObject("assets/base1.png", ren);
-                    SDL_RenderCopy(ren, texture, NULL, &dest);
-                    break;
-                case 2:
-                    Map::LoadObject("assets/base2.png", ren);
-                    SDL_RenderCopy(ren, texture, NULL, &dest);
-                    break;
-                case 3:
-                    Map::LoadObject("assets/base3.png", ren);
-                    SDL_RenderCopy(ren, texture, NULL, &dest);
-                    break;
-                case 4:
-                    Map::LoadObject("assets/base4.png", ren);
-                    SDL_RenderCopy(ren, texture, NULL, &dest);
-                    break;
-                case 5:
-                    Map::LoadObject("assets/base5.png", ren);
-                    SDL_RenderCopy(ren, texture, NULL, &dest);
-                    break;
-                case 6:
-                    Map::LoadObject("assets/base6.png", ren);
-                    SDL_RenderCopy(ren, texture, NULL, &dest);
-                    break;
-                case 7:
-                    Map::LoadObject("assets/base7.png", ren);
-                    SDL_RenderCopy(ren, texture, NULL, &dest);
-                    break;
-                case 8:
-                    Map::LoadObject("assets/base8.png", ren);
-                    SDL_RenderCopy(ren, texture, NULL, &dest);
-                    break;
-                case 9:
-                    Map::LoadObject("assets/base9.png", ren);
-                    SDL_RenderCopy(ren, texture, NULL, &dest);
-                    break;
-                default:
-                    break;
+    int x1 = 0;
+    int x2 = 0;
+    int y1 = 0;
+    int y2 = 0;
+
+    int map_x = 0;
+    int map_y = 0;
+
+    map_x = mapdata.start_x_ / TILE_SIZE;
+
+    x1 = (mapdata.start_x_ % TILE_SIZE) * -1;
+    x2 = x1 + SCREEN_WIDTH + (x1 == 0 ? 0 : TILE_SIZE);  // Biểu thức điều kiện
+
+    map_y = mapdata.start_y_ / TILE_SIZE;
+
+    y1 = (mapdata.start_y_ % TILE_SIZE) * -1;
+    y2 = y1 + SCREEN_HEIGHT + (y1 == 0 ? 0 : TILE_SIZE);
+
+    for (int i= y1; i < y2; i+= TILE_SIZE) {
+        map_x = mapdata.start_x_ / TILE_SIZE;
+        for (int j = x1; j < x2; j+= TILE_SIZE) {
+            int type = mapdata.tile[map_y][map_x];
+            if (type > 0) { 
+                tile_rect.x = j;
+                tile_rect.y = i;
+                tile_map[type].RenderTexture(ren, &tile_rect);
             }
-            
+            map_x++;
         }
+ 
+        map_y++;
     }
 }
