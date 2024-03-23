@@ -1,8 +1,8 @@
 #include "Game.h"   
 #include "TextureManager.h"
+#include "GameObject.h"
 
-SDL_Texture* texture;
-SDL_Rect desR;
+GameObject* player;
 
 Game::Game() {
 }
@@ -11,6 +11,7 @@ Game::~Game() {
 
 void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bool fullscreen) {
     int flags = 0;
+
     if (fullscreen) {
         flags = SDL_WINDOW_FULLSCREEN;
     }
@@ -28,9 +29,7 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
     } else {
         isRunning = false;
     }
-
-    texture = TextureManager::LoadTexture("assets/base1.png", renderer);
-
+    player = new GameObject("assets/base1.png", renderer, 0, 0);
 }
 
 void Game::HandleEvents() {
@@ -46,14 +45,12 @@ void Game::HandleEvents() {
 }
 
 void Game::Update() {
-    cnt++;
-    desR.h = 32;
-    desR.w = 32;
+    player->Update();
 }
 
 void Game::Render() {
     SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, texture, NULL, &desR);
+    player->Render();
     SDL_RenderPresent(renderer);
 }
 
