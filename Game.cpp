@@ -1,8 +1,17 @@
 #include "Game.h"   
 #include "TextureManager.h"
-#include "GameObject.h"
+#include "Map.h"
 
-GameObject* player;
+#include "ECS/ECS.h"
+#include "ECS/Component.h"
+#include "ECS/PositionComponents.h"
+
+Map* map;  
+
+SDL_Renderer* Game::renderer = nullptr;
+
+Manager manager;
+auto& player(manager.addEntity());
 
 Game::Game() {
 }
@@ -29,7 +38,12 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
     } else {
         isRunning = false;
     }
-    player = new GameObject("assets/base1.png", renderer, 0, 0);
+    map = new Map();
+
+    // thực hiện khởi tạo các thành phần của player
+    player.addComponent<PositionComponent>();
+    player.addComponent<SpriteComponent>("assets/base1.png");
+    
 }
 
 void Game::HandleEvents() {
@@ -45,12 +59,20 @@ void Game::HandleEvents() {
 }
 
 void Game::Update() {
-    player->Update();
+    
+    manager.refresh();
+    manager.update();
+
+    if (player.getComponent<PositionComponent>().x() > 100) {
+        player.getComponent<SpriteComponent>().setTex("assets/base9.png");
+    }
+
 }
 
 void Game::Render() {
     SDL_RenderClear(renderer);
-    player->Render();
+    map->DrawMap();
+    manager.draw();
     SDL_RenderPresent(renderer);
 }
 

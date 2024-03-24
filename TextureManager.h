@@ -2,16 +2,14 @@
 #define TEXTUREMANAGER_H
 
 #include "CommonFunc.h"
+#include "Game.h"
 
 class TextureManager {
     public:
         TextureManager();
         ~TextureManager();
-        
-        virtual bool LoadTexture(const char *fileName, SDL_Renderer *ren);
-        void RenderTexture(SDL_Renderer* tex, const SDL_Rect* clip);
-        void free();
-
+        static SDL_Texture* LoadTexture(const char* fileName);
+        static void Draw(SDL_Texture* texture, SDL_Rect src, SDL_Rect dest);
     private:
         SDL_Texture* texture;
         SDL_Rect rect;
