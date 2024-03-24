@@ -3,7 +3,8 @@
 
 #include "ECS.h"
 #include "SpriteComponent.h"
-#include "PositionComponents.h"
+#include "TransformComponent.h"
+#include "KeyboardControler.h"
 
 
 #endif // __COMPONENT_H__
