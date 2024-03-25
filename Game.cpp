@@ -1,22 +1,33 @@
 #include "Game.h"   
 #include "TextureManager.h"
 #include "Map.h"
-
+#include "SDL2/SDL.h"
 #include "ECS/ECS.h"
 #include "ECS/Component.h"
-#include "ECS/PositionComponents.h"
+#include "ECS/TransformComponent.h"
+#include "Vector2D.h" 
+#include "Collision.h"
 
-Map* map;  
 
-SDL_Renderer* Game::renderer = nullptr;
-
-Manager manager;
-auto& player(manager.addEntity());
 
 Game::Game() {
 }
 Game::~Game() {
 }
+
+Manager manager;
+SDL_Renderer* Game::renderer = nullptr;
+SDL_Event Game::event;
+Map* map;
+
+std::vector<ColliderComponent*> Game::colliders;
+
+auto& player(manager.addEntity());
+auto& wall(manager.addEntity());    
+
+auto& tile1(manager.addEntity());
+auto& tile2(manager.addEntity());
+auto& tile3(manager.addEntity());
 
 void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bool fullscreen) {
     int flags = 0;
@@ -40,14 +51,29 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
     }
     map = new Map();
 
+    // thực hiện khởi tạo các thành phần của tile
+    tile1.addComponent<TileComponent>(200, 200, 32, 32, 0);
+    tile2.addComponent<TileComponent>(250, 250, 32, 32, 1);
+    tile2.addComponent<ColliderComponent>("base6"); 
+    tile3.addComponent<TileComponent>(300, 300, 32, 32, 2);
+    tile3.addComponent<ColliderComponent>("base7");    
+
     // thực hiện khởi tạo các thành phần của player
-    player.addComponent<PositionComponent>();
+    player.addComponent<TransformComponent>(2);
     player.addComponent<SpriteComponent>("assets/base1.png");
-    
+    player.addComponent<KeyboardControler>();
+    player.addComponent<ColliderComponent>("player");
+
+    // thực hiện khởi tạo các thành phần của wall
+    wall.addComponent<TransformComponent>(300.0f, 300.0f, 300, 20, 1);
+    wall.addComponent<SpriteComponent>("assets/base5.png");
+    wall.addComponent<ColliderComponent>("wall");      
+
 }
 
 void Game::HandleEvents() {
-    SDL_Event event;
+
+
     SDL_PollEvent(&event);
     switch (event.type) {
     case SDL_QUIT:
@@ -63,10 +89,10 @@ void Game::Update() {
     manager.refresh();
     manager.update();
 
-    if (player.getComponent<PositionComponent>().x() > 100) {
-        player.getComponent<SpriteComponent>().setTex("assets/base9.png");
+    for (auto cc : colliders) 
+    {
+        if (Collision::AAABB(player.getComponent<ColliderComponent>(), *cc->collider);
     }
-
 }
 
 void Game::Render() {

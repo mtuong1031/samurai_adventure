@@ -2,6 +2,9 @@
 #define _GAME_H_
 
 #include "CommonFunc.h"
+#include <vector>
+
+class ColliderComponent;
 
 class Game 
 {
@@ -16,10 +19,13 @@ class Game
         void Clean();
         bool Running();
 
+        static SDL_Renderer* renderer;
+        static SDL_Event event;
+        static std::vector<ColliderComponent*> colliders;
+
     private:
-        int cnt;
+        int cnt = 0;
         SDL_Window* window;
-        SDL_Renderer* renderer;
         bool isRunning;
 };
 

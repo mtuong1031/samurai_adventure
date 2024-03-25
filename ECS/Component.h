@@ -5,6 +5,8 @@
 #include "SpriteComponent.h"
 #include "TransformComponent.h"
 #include "KeyboardControler.h"
+#include "ColliderComponent.h"
+#include "TileComponent.h"
 
 
 #endif // __COMPONENT_H__
