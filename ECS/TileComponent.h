@@ -27,7 +27,6 @@ class TileComponent : public Component{
             switch (tileID)
             {
                 case 0:
-                    path = "assets/base6.png";
                     break;
                 case 1:
                     path = "assets/base7.png";

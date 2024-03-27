@@ -1,22 +1,15 @@
 #include "Map.h"
 
 
-Map::Map() {
-    base = TextureManager::LoadTexture("assets/base1.png");
+Map::Map() 
+{}
 
-    src.x = src.y = 0;
-    src.w = dest.w = 32;
-    src.h = dest.h = 32;
-    dest.x = dest.y = 0;
+Map::~Map() 
+{}
 
-    LoadMap("map_tiles_1.txt");
-}
-
-Map::~Map() {
-    SDL_DestroyTexture(base);
-}
-
-void Map::LoadMap(const char *path) {
+void Map::LoadMap(std::string path, int sizeX, int sizeY) 
+{
+    char tile;
     std::fstream mapFile;
     mapFile.open(path);
     if (!mapFile) {
@@ -24,31 +17,15 @@ void Map::LoadMap(const char *path) {
         return;
     }
 
-    for (int i = 0; i < 20; i++) {
-        for (int j = 0; j < 25; j++) {
-            mapFile >> map[i][j];
+    for (int y = 0; y < sizeY; y++)
+    {
+        for (int x = 0; x < sizeX; x++)
+        {
+            mapFile.get(tile);
+            Game::AddTile(atoi(&tile), x*32, y*32);
+            mapFile.ignore();
         }
     }
 
     mapFile.close();
-}
-
-void Map::DrawMap () {
-    int type = 0;
-    for (int i = 0; i < 20; i++) {
-        for (int j = 0; j < 25; j++) {
-
-            type = map[i][j];
-            dest.x = j * 32;
-            dest.y = i * 32;    
-
-            switch (type) {
-                case 0:
-                    TextureManager::Draw(base, src, dest);
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
 }

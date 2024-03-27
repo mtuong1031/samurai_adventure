@@ -4,18 +4,17 @@
 
 #include "Game.h"
 #include "TextureManager.h"
+#include <fstream>
+#include <string>
 
 class Map {
     public:
         Map();
         ~Map();
-        void LoadMap(const char *path);
-        void DrawMap();
+        static void LoadMap(std::string path, int sizeX, int sizeY);
 
     private:
-        SDL_Rect src, dest;
-        SDL_Texture* base;
-        int map[20][25];
+        
 };  
 
 #endif
