@@ -23,11 +23,18 @@ Map* map;
 std::vector<ColliderComponent*> Game::colliders;
 
 auto& player(manager.addEntity());
-auto& wall(manager.addEntity());    
+auto& wall(manager.addEntity());   
 
-auto& tile1(manager.addEntity());
-auto& tile2(manager.addEntity());
-auto& tile3(manager.addEntity());
+// tạo nhóm cho các thành phần
+enum groupLabels : std::size_t
+{
+    groupMap,
+    groupPlayers,
+    groupEnemies,
+    groupColliders,
+    groupProjectiles
+};
+
 
 void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bool fullscreen) {
     int flags = 0;
@@ -51,24 +58,20 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
     }
     map = new Map();
 
-    // thực hiện khởi tạo các thành phần của tile
-    tile1.addComponent<TileComponent>(200, 200, 32, 32, 0);
-    tile2.addComponent<TileComponent>(250, 250, 32, 32, 1);
-    tile2.addComponent<ColliderComponent>("base6"); 
-    tile3.addComponent<TileComponent>(300, 300, 32, 32, 2);
-    tile3.addComponent<ColliderComponent>("base7");    
-
     // thực hiện khởi tạo các thành phần của player
+    map->LoadMap("assets/map.map",16, 20);
+
     player.addComponent<TransformComponent>(2);
-    player.addComponent<SpriteComponent>("assets/base1.png");
+    player.addComponent<SpriteComponent>("image/player_anie.png", true);
     player.addComponent<KeyboardControler>();
     player.addComponent<ColliderComponent>("player");
+    player.addGroup(groupPlayers);
 
     // thực hiện khởi tạo các thành phần của wall
     wall.addComponent<TransformComponent>(300.0f, 300.0f, 300, 20, 1);
     wall.addComponent<SpriteComponent>("assets/base5.png");
     wall.addComponent<ColliderComponent>("wall");      
-
+    wall.addGroup(groupMap);    
 }
 
 void Game::HandleEvents() {
@@ -91,14 +94,28 @@ void Game::Update() {
 
     for (auto cc : colliders) 
     {
-        if (Collision::AAABB(player.getComponent<ColliderComponent>(), *cc->collider);
+        Collision::AAABB(player.getComponent<ColliderComponent>(), *cc);
     }
 }
 
+auto& tiles(manager.getGroup(groupMap));
+auto& players(manager.getGroup(groupPlayers));
+auto& enemies(manager.getGroup(groupEnemies));
+
 void Game::Render() {
     SDL_RenderClear(renderer);
-    map->DrawMap();
-    manager.draw();
+    // thực hiện vẽ map
+    for (auto& t : tiles) {
+        t->Draw();
+    }
+    // thực hiện vẽ player
+    for (auto& p : players) {
+        p->Draw();
+    }
+    // thực hiện vẽ ememies
+    for (auto& e : enemies) {
+        e->Draw();
+    }
     SDL_RenderPresent(renderer);
 }
 
@@ -111,4 +128,11 @@ void Game::Clean() {
 
 bool Game::Running() {
     return isRunning;
+}
+
+void Game::AddTile(int id, int x, int y)
+{
+    auto& tile(manager.addEntity());
+    tile.addComponent<TileComponent>(x, y, 32, 32, id);
+    tile.addGroup(groupMap);
 }
