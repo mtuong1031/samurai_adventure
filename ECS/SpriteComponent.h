@@ -17,7 +17,7 @@ class SpriteComponent : public Component {
 
         bool animated = false;
         int frames = 0;
-        int speed = 100; // tốc độ chuyển động của hình ảnh
+        int speed = 400; // tốc độ chuyển động của hình ảnh
 
     public:
 

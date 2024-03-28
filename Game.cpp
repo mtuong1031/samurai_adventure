@@ -25,6 +25,8 @@ std::vector<ColliderComponent*> Game::colliders;
 auto& player(manager.addEntity());
 auto& wall(manager.addEntity());   
 
+const char* mapFile = "assets/base-sheet.png";
+
 // tạo nhóm cho các thành phần
 enum groupLabels : std::size_t
 {
@@ -59,19 +61,14 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
     map = new Map();
 
     // thực hiện khởi tạo các thành phần của player
-    map->LoadMap("assets/map.map",16, 20);
+    Map::LoadMap("assets/map_map.txt", 25, 25);
 
     player.addComponent<TransformComponent>(2);
     player.addComponent<SpriteComponent>("image/player_anie.png", true);
     player.addComponent<KeyboardControler>();
     player.addComponent<ColliderComponent>("player");
     player.addGroup(groupPlayers);
-
-    // thực hiện khởi tạo các thành phần của wall
-    wall.addComponent<TransformComponent>(300.0f, 300.0f, 300, 20, 1);
-    wall.addComponent<SpriteComponent>("assets/base5.png");
-    wall.addComponent<ColliderComponent>("wall");      
-    wall.addGroup(groupMap);    
+ 
 }
 
 void Game::HandleEvents() {
@@ -91,9 +88,7 @@ void Game::Update() {
     
     manager.refresh();
     manager.update();
-
-    for (auto cc : colliders) 
-    {
+    for (auto cc : colliders) {
         Collision::AAABB(player.getComponent<ColliderComponent>(), *cc);
     }
 }
@@ -112,10 +107,6 @@ void Game::Render() {
     for (auto& p : players) {
         p->Draw();
     }
-    // thực hiện vẽ ememies
-    for (auto& e : enemies) {
-        e->Draw();
-    }
     SDL_RenderPresent(renderer);
 }
 
@@ -130,9 +121,9 @@ bool Game::Running() {
     return isRunning;
 }
 
-void Game::AddTile(int id, int x, int y)
+void Game::AddTile(int srcX, int srcY, int xpos, int ypos)
 {
     auto& tile(manager.addEntity());
-    tile.addComponent<TileComponent>(x, y, 32, 32, id);
+    tile.addComponent<TileComponent>(srcX, srcY, xpos, ypos, mapFile);
     tile.addGroup(groupMap);
 }

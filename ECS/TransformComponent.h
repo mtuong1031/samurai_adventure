@@ -11,11 +11,11 @@ class TransformComponent : public Component
         Vector2D position;
         Vector2D velocity; // tốc độ
 
-        int height = 60;
-        int width = 60;
+        int height = 30;
+        int width = 30;
         int scale = 1;
 
-        int speed = 3;
+        int speed = 7;
 
         TransformComponent() {
             position.Zero();
