@@ -18,14 +18,19 @@ Game::~Game() {
 Manager manager;
 SDL_Renderer* Game::renderer = nullptr;
 SDL_Event Game::event;
+
+SDL_Rect Game::camera = { 0, 0, 960, 640 };
+
 Map* map;
 
 std::vector<ColliderComponent*> Game::colliders;
 
+bool Game::isRunning = false;
+
 auto& player(manager.addEntity());
 auto& wall(manager.addEntity());   
 
-const char* mapFile = "assets/base-sheet.png";
+const char* mapFile = "assets/basemaps-sheet.png";
 
 // tạo nhóm cho các thành phần
 enum groupLabels : std::size_t
@@ -37,6 +42,9 @@ enum groupLabels : std::size_t
     groupProjectiles
 };
 
+auto& tiles(manager.getGroup(groupMap));
+auto& players(manager.getGroup(groupPlayers));
+auto& enemies(manager.getGroup(groupEnemies));
 
 void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bool fullscreen) {
     int flags = 0;
@@ -61,7 +69,7 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
     map = new Map();
 
     // thực hiện khởi tạo các thành phần của player
-    Map::LoadMap("assets/map_map.txt", 25, 25);
+    Map::LoadMap("assets/map_map.txt", 30, 20 );
 
     player.addComponent<TransformComponent>(2);
     player.addComponent<SpriteComponent>("image/player_anie.png", true);
@@ -88,14 +96,28 @@ void Game::Update() {
     
     manager.refresh();
     manager.update();
-    for (auto cc : colliders) {
-        Collision::AAABB(player.getComponent<ColliderComponent>(), *cc);
-    }
-}
 
-auto& tiles(manager.getGroup(groupMap));
-auto& players(manager.getGroup(groupPlayers));
-auto& enemies(manager.getGroup(groupEnemies));
+    camera.x = player.getComponent<TransformComponent>().position.x - 480;
+    camera.y = player.getComponent<TransformComponent>().position.y - 320;
+    
+    if(camera.x < 0)
+    {
+        camera.x = 0;
+    }
+    if(camera.y < 0)
+    {
+        camera.y = 0;
+    }
+    if(camera.x > camera.w)
+    {
+        camera.x = camera.w;
+    }
+    if(camera.y > camera.h)
+    {
+        camera.y = camera.h;
+    }
+
+}
 
 void Game::Render() {
     SDL_RenderClear(renderer);
