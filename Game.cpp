@@ -23,28 +23,10 @@ SDL_Rect Game::camera = { 0, 0, 960, 640 };
 
 Map* map;
 
-std::vector<ColliderComponent*> Game::colliders;
 
 bool Game::isRunning = false;
 
 auto& player(manager.addEntity());
-auto& wall(manager.addEntity());   
-
-const char* mapFile = "assets/basemaps-sheet.png";
-
-// tạo nhóm cho các thành phần
-enum groupLabels : std::size_t
-{
-    groupMap,
-    groupPlayers,
-    groupEnemies,
-    groupColliders,
-    groupProjectiles
-};
-
-auto& tiles(manager.getGroup(groupMap));
-auto& players(manager.getGroup(groupPlayers));
-auto& enemies(manager.getGroup(groupEnemies));
 
 void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bool fullscreen) {
     int flags = 0;
@@ -66,10 +48,10 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
     } else {
         isRunning = false;
     }
-    map = new Map();
+    map = new Map("assets/basemap-sheet.png", 2, 32);
 
     // thực hiện khởi tạo các thành phần của player
-    Map::LoadMap("assets/map_map.txt", 30, 20 );
+    map->LoadMap("map/map.map", 30, 20);
 
     player.addComponent<TransformComponent>(2);
     player.addComponent<SpriteComponent>("image/player_anie.png", true);
@@ -79,8 +61,12 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
  
 }
 
-void Game::HandleEvents() {
+auto& tiles(manager.getGroup(Game::groupMap));
+auto& players(manager.getGroup(Game::groupPlayers));
+auto& colliders(manager.getGroup(Game::groupColliders));
 
+void Game::HandleEvents() 
+{
 
     SDL_PollEvent(&event);
     switch (event.type) {
@@ -92,10 +78,23 @@ void Game::HandleEvents() {
     }
 }
 
-void Game::Update() {
+void Game::Update() 
+{
+
+    SDL_Rect playerCol = player.getComponent<ColliderComponent>().collider;
+    Vector2D playerPos = player.getComponent<TransformComponent>().position;
     
     manager.refresh();
     manager.update();
+
+    for (auto& c : colliders)
+    {
+        SDL_Rect cCol = c->getComponent<ColliderComponent>().collider;
+        if(Collision::AAABB(playerCol, cCol))
+        {
+            player.getComponent<TransformComponent>().position = playerPos;
+        }
+    }
 
     camera.x = player.getComponent<TransformComponent>().position.x - 480;
     camera.y = player.getComponent<TransformComponent>().position.y - 320;
@@ -125,6 +124,12 @@ void Game::Render() {
     for (auto& t : tiles) {
         t->Draw();
     }
+
+    for (auto& c : colliders)
+    {
+        c->Draw();
+    }
+
     // thực hiện vẽ player
     for (auto& p : players) {
         p->Draw();
@@ -141,11 +146,4 @@ void Game::Clean() {
 
 bool Game::Running() {
     return isRunning;
-}
-
-void Game::AddTile(int srcX, int srcY, int xpos, int ypos)
-{
-    auto& tile(manager.addEntity());
-    tile.addComponent<TileComponent>(srcX, srcY, xpos, ypos, mapFile);
-    tile.addGroup(groupMap);
 }
