@@ -1,11 +1,13 @@
-#ifndef _SPRITECOMPONENT_H_
-#define _SPRITECOMPONENT_H_
+#pragma once
+
+#include "SDL2/SDL.h"
+#include <map>
 
 #include "Component.h"
-#include "TransformComponent.h"
 #include "../TextureManager.h"
 #include "Animation.h"
-#include <map>
+#include "../AssetManager.h"
+#include  "TransformComponent.h"
 
 
 /// quản lý và hiển thị các thành phần hình ảnh
@@ -17,7 +19,7 @@ class SpriteComponent : public Component {
 
         bool animated = false;
         int frames = 0;
-        int speed = 400; // tốc độ chuyển động của hình ảnh
+        int speed = 100; // tốc độ chuyển động của hình ảnh
 
     public:
 
@@ -29,32 +31,35 @@ class SpriteComponent : public Component {
         SDL_RendererFlip spriteFlip = SDL_FLIP_NONE;
 
         SpriteComponent() = default;
-        SpriteComponent(const char *path) 
+        SpriteComponent(std::string id) 
         {
-            setTex(path);
+            setTex(id);
         }
 
-        SpriteComponent(const char *path, bool isAnimated) 
+        SpriteComponent(std::string id, bool isAnimated) 
         {
             animated = true;
 
-            Animation idle = Animation(0, 8, 100);
-            Animation run = Animation(1, 8, 100);
+            Animation idle = Animation(0, 5, 100, 64, 80);
+            Animation run = Animation(1, 8, 100, 64, 80);
+            Animation attack = Animation(2, 10, 100, 80, 144);    
 
-            animations.emplace("Idle", idle);
+            animations.emplace("Idle", idle);   
             animations.emplace("Run", run);
+            animations.emplace("Attack", attack);
 
             Play("Idle");
             Play("Run");
-            setTex(path);
+            Play("Attack");
+
+            setTex(id);
         }
 
         ~SpriteComponent() {
-            SDL_DestroyTexture(texture);
         }
 
-        void setTex(const char *path) {
-            texture = TextureManager::LoadTexture(path);
+        void setTex(std::string id) {
+            texture = Game::assets->GetTexture(id);
         }
 
         void init() override 
@@ -84,11 +89,10 @@ class SpriteComponent : public Component {
             TextureManager::Draw(texture, srcRect, destRect, spriteFlip);
         }
 
-        void Play(const char *animName) {
+        void Play(const char *animName) 
+        {
             frames = animations[animName].frames;
             anieIndex = animations[animName].index;
             speed = animations[animName].speed;
         }
 };
-
-#endif // _SPRITECOMPONENT_H_
