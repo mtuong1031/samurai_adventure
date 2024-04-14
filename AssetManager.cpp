@@ -8,6 +8,15 @@ AssetManager::AssetManager(Manager* man) : manager(man)
 
 AssetManager::~AssetManager() {    }
 
+void AssetManager::CreatePlayer(Vector2D pos, int speed, std::string id) {
+    auto& player(manager->addEntity());
+
+    player.addComponent<TransformComponent>(pos.x, pos.y, 80, 60, 1);
+    player.addComponent<SpriteComponent>(id, true);
+    player.addComponent<KeyboardControler>();
+    player.addComponent<ColliderComponent>("player");
+    player.addGroup(Game::groupPlayers);
+}
 
 void AssetManager::CreateProjectile(Vector2D pos, Vector2D vel, int range, int speed, std::string id) {
     auto& projectile(manager->addEntity());
@@ -19,6 +28,15 @@ void AssetManager::CreateProjectile(Vector2D pos, Vector2D vel, int range, int s
     projectile.addGroup(Game::groupProjectiles);
 }
 
+void AssetManager::CreateEnemy(Vector2D pos, int range, int speed, std::string id) {
+    auto& enemy(manager->addEntity());
+
+    enemy.addComponent<TransformComponent>(pos.x, pos.y, 64, 64, 1);
+    enemy.addComponent<SpriteComponent>(id, true);
+    enemy.addComponent<Enemy>(range, speed);
+    enemy.addComponent<ColliderComponent>("enemy");
+    enemy.addGroup(Game::groupEnemies);
+}
 
 void AssetManager::AddTexture(std::string id, const char* path) {
     textures.emplace(id, TextureManager::LoadTexture(path));
