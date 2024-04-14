@@ -24,6 +24,8 @@ class SpriteComponent : public Component {
     public:
 
         int anieIndex = 0;
+        const char* currentAnimationName;
+        Uint32 aniStartTime = 0;
 
         std::map<const char*, Animation> animations;
 
@@ -38,11 +40,14 @@ class SpriteComponent : public Component {
 
         SpriteComponent(std::string id, bool isAnimated) 
         {
-            animated = true;
+            animated = isAnimated;
 
+            // Animation idle = Animation(0, 5, 100, 64, 64);
+            // Animation run = Animation(1, 8, 100, 64, 64);
+            // Animation attack = Animation(2, 10, 100, 160, 64);   
             Animation idle = Animation(0, 5, 100, 64, 80);
             Animation run = Animation(1, 8, 100, 64, 80);
-            Animation attack = Animation(2, 10, 100, 80, 144);    
+            Animation attack = Animation(2, 8, 100, 196, 112);
 
             animations.emplace("Idle", idle);   
             animations.emplace("Run", run);
@@ -79,10 +84,17 @@ class SpriteComponent : public Component {
 
             srcRect.y = anieIndex * transform->height;
 
-            destRect.x = static_cast<int>(transform->position.x) - Game::camera.x;  
-            destRect.y = static_cast<int>(transform->position.y) - Game::camera.y;  
-            destRect.w = transform->width * transform->scale;
-            destRect.h = transform->height * transform->scale;
+            srcRect.w = animations[currentAnimationName].width;
+            srcRect.h = animations[currentAnimationName].height;
+
+            destRect.y = static_cast<int>(transform->position.y) - Game::camera.y - animations[currentAnimationName].height + 112;
+
+            destRect.x = static_cast<int>(transform->position.x) - Game::camera.x - animations[currentAnimationName].width / 2 + transform->width / 2;  
+            
+            destRect.y = static_cast<int>(transform->position.y) - Game::camera.y - animations[currentAnimationName].height + 112; 
+             
+            destRect.w = animations[currentAnimationName].width * transform->scale;
+            destRect.h = animations[currentAnimationName].height * transform->scale;
         }
 
         void draw() override {
@@ -91,8 +103,13 @@ class SpriteComponent : public Component {
 
         void Play(const char *animName) 
         {
+            currentAnimationName = animName;
+
             frames = animations[animName].frames;
             anieIndex = animations[animName].index;
             speed = animations[animName].speed;
+
+            if (anieIndex >= 2)
+                aniStartTime = SDL_GetTicks();
         }
 };
