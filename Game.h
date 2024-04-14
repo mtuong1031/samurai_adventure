@@ -1,6 +1,5 @@
 #pragma once
 
-// #include "CommonFunc.h"
 #include <iostream>
 #include <vector>
 
@@ -12,6 +11,7 @@ static const int WINDOW_HEIGHT = 540;
 
 class ColliderComponent;
 class AssetManager;
+class Vector2D;
 
 class Game 
 {
@@ -31,6 +31,7 @@ class Game
         static SDL_Event event;
         static bool isRunning;
         static SDL_Rect camera;
+        static SDL_Rect playerRect;
         static AssetManager* assets;
         // tạo nhóm cho các thành phần
         enum groupLabels : std::size_t

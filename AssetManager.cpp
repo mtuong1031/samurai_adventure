@@ -1,7 +1,6 @@
 #include "AssetManager.h"
 #include "ECS/Component.h"
 
-
 AssetManager::AssetManager(Manager* man) : manager(man) 
 {    }
 
@@ -28,12 +27,12 @@ void AssetManager::CreateProjectile(Vector2D pos, Vector2D vel, int range, int s
     projectile.addGroup(Game::groupProjectiles);
 }
 
-void AssetManager::CreateEnemy(Vector2D pos, int range, int speed, std::string id) {
+void AssetManager::CreateEnemies(Vector2D pos, Vector2D vel, int range, int speed, std::string id) {
     auto& enemy(manager->addEntity());
 
     enemy.addComponent<TransformComponent>(pos.x, pos.y, 64, 64, 1);
     enemy.addComponent<SpriteComponent>(id, true);
-    enemy.addComponent<Enemy>(range, speed);
+    enemy.addComponent<TheEnemies>(range, speed, vel);
     enemy.addComponent<ColliderComponent>("enemy");
     enemy.addGroup(Game::groupEnemies);
 }

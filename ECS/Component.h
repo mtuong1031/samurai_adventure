@@ -1,5 +1,4 @@
-#ifndef __COMPONENT_H__
-#define __COMPONENT_H__
+#pragma once
 
 #include "ECS.h"
 #include "SpriteComponent.h"
@@ -7,6 +6,5 @@
 #include "KeyboardControler.h"
 #include "ColliderComponent.h"
 #include "TileComponent.h"
-
-
-#endif // __COMPONENT_H__
+#include "ProjectileComponent.h"
+#include "TheEnemies.h"

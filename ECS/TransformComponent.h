@@ -1,7 +1,6 @@
-#ifndef _TransformComponent_h_
-#define _TransformComponent_h_
+#pragma once
 
-#include "Component.h" 
+#include "Component.h"
 #include "../Vector2D.h "
 
 /// quản lý và hiển thị các thành phần vị trí
@@ -11,8 +10,8 @@ class TransformComponent : public Component
         Vector2D position;
         Vector2D velocity; // tốc độ
 
-        int height = 30;
-        int width = 30;
+        int height = 80;
+        int width = 64;
         int scale = 1;
 
         int speed = 7;
@@ -23,13 +22,14 @@ class TransformComponent : public Component
 
         TransformComponent(int sc)
         {
-            position.x = 400;
-            position.y = 320;
+            position.x = 30;
+            position.y = 30;
             scale = sc;
         }
 
         TransformComponent(float x, float y) {
-            position.Zero();
+            position.x = x;
+            position.y = y;
         }
 
         TransformComponent(float x, float y, int h, int w, int s) {
@@ -39,6 +39,20 @@ class TransformComponent : public Component
             width = w;
             scale = s;
         }
+        // float getRectX(std::tring id){
+        //     if (id == "player")
+        //     {
+        //         return position.x;
+        //     }
+        //     return 0;
+        // }
+
+        // float getRectY(std::tring id){
+        //     if (id == "player")
+        //     {
+        //         return position.y;
+        //     }
+        //     return 0;
 
         void init() override {
             velocity.Zero();
@@ -50,5 +64,3 @@ class TransformComponent : public Component
         }
 };
 
-
-#endif // _TransformComponent_H_

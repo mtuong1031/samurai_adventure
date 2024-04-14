@@ -15,12 +15,11 @@ SDL_Event Game::event;
 // SDL_Rect Game::camera = {0, 0, map->getScaledSize() * map->getSizeX() - WINDOW_WIDTH, 
 //                                 map->getScaledSize() * map->getSizeY() - WINDOW_HEIGHT};
 SDL_Rect Game::camera = {0, 0, 960, 0};
+SDL_Rect Game::playerRect = {0, 0, 64, 80};  // x y w h
 
 AssetManager* Game::assets = new AssetManager(&manager);
 
 bool Game::isRunning = false;
-
-auto& player(manager.addEntity());
 
 Game::Game() {
 }
@@ -60,28 +59,17 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
     map->LoadMap("assets/2s.map", 55, 16);
 
     // thực hiện khởi tạo các thành phần của player
-
-    player.addComponent<TransformComponent>(1);
-    player.addComponent<SpriteComponent>("player", true);
-    player.addComponent<KeyboardControler>();
-    player.addComponent<ColliderComponent>("player");
-    player.addGroup(groupPlayers);
+    assets->CreatePlayer(Vector2D(300, 300), 200, "player");
  
     // thực hiện khởi tạo các thành phần của enemy
-    // assets->CreateEnemy(Vector2D(300, 300), 200, 2, "enemy");   
-    // assets->CreateEnemy(Vector2D(400, 300), 200, 2, "enemy"); 
-
-    // assets->CreateProjectile(Vector2D(600, 600), Vector2D(2, 0), 200, 2, "projectile");
-    // assets->CreateProjectile(Vector2D(600, 620), Vector2D(2, 0), 200, 2, "projectile");
-    // assets->CreateProjectile(Vector2D(400, 600), Vector2D(2, 1), 200, 2, "projectile");
-    // assets->CreateProjectile(Vector2D(600, 600), Vector2D(2, -1), 200, 2, "projectile");
+    assets->CreateEnemies(Vector2D(600, 100), Vector2D(0,0), 200, 1, "enemy");
 }
 
 auto& tiles(manager.getGroup(Game::groupMap));
 auto& players(manager.getGroup(Game::groupPlayers));
 auto& colliders(manager.getGroup(Game::groupColliders));
 auto& projectiles(manager.getGroup(Game::groupProjectiles));
-// auto& enemies(manager.getGroup(Game::groupEnemies));
+auto& enemies(manager.getGroup(Game::groupEnemies));
 
 void Game::HandleEvents() 
 {
@@ -99,9 +87,11 @@ void Game::HandleEvents()
 void Game::Update() 
 {
 
-    SDL_Rect playerCol = player.getComponent<ColliderComponent>().collider;
-    Vector2D playerPos = player.getComponent<TransformComponent>().position;
-    
+    // SDL_Rect playerCol = player.getComponent<ColliderComponent>().collider;
+    // Vector2D playerPos = player.getComponent<TransformComponent>().position;
+    SDL_Rect playerCol = players[0]->getComponent<ColliderComponent>().collider;
+    Vector2D playerPos = players[0]->getComponent<TransformComponent>().position;
+
     manager.refresh();
     manager.update();
 
@@ -109,25 +99,30 @@ void Game::Update()
         SDL_Rect cCol = c->getComponent<ColliderComponent>().collider;
         
         if (Collision::AAABB(playerCol, cCol))
-            player.getComponent<TransformComponent>().position.y = playerPos.y;
+        {
+            playerPos = playerPos - players[0]->getComponent<TransformComponent>().velocity;
+            players[0]->getComponent<TransformComponent>().position = playerPos;
+        }
     }
-
-    // for (auto& p : projectiles) {
-    //     SDL_Rect progCol = p->getComponent<ColliderComponent>().collider;
-        
-    //     if (Collision::AAABB(playerCol, progCol))
-    //         p->destroy();
-    // }
 
     for (auto& e : enemies) {
         SDL_Rect eCol = e->getComponent<ColliderComponent>().collider;
+        Vector2D ePos = e->getComponent<TransformComponent>().position;
+        Vector2D eVel = e->getComponent<TransformComponent>().velocity;
         
         if (Collision::AAABB(playerCol, eCol))
-            e->destroy();
+        {
+            std::cout << "Player hit enemy" << std::endl;
+        }
+
     }
 
-    camera.x = player.getComponent<TransformComponent>().position.x - 480;
-    camera.y = player.getComponent<TransformComponent>().position.y - 320;
+    // camera.x = player.getComponent<TransformComponent>().position.x - 480;
+    // camera.y = player.getComponent<TransformComponent>().position.y - 320;
+    camera.x = players[0]->getComponent<TransformComponent>().position.x - 480;
+    camera.y = players[0]->getComponent<TransformComponent>().position.y - 320;
+    playerRect.x = players[0]->getComponent<TransformComponent>().position.x;
+    playerRect.y = players[0]->getComponent<TransformComponent>().position.y;
     
     if(camera.x < 0)
     {
@@ -165,15 +160,10 @@ void Game::Render() {
         p->Draw();
     }
 
-    for (auto& p : projectiles)
+    for (auto& e : enemies)
     {
-        p->Draw();
+        e->Draw();
     }
-
-    // for (auto& e : enemies)
-    // {
-    //     e->Draw();
-    // }
 
     SDL_RenderPresent(renderer);
 }
