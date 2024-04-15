@@ -50,8 +50,8 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
     assets->AddTexture("terrain", "assets/tileset.png");
     // assets->AddTexture("player", "image/ani_sd.png");
     assets->AddTexture("player", "image/animatinons_char1.png");
-    assets->AddTexture("projectile", "image/proj.png");\
-    assets->AddTexture("enemy", "image/ani_sd.png");
+    assets->AddTexture("projectile", "image/proj.png");
+    assets->AddTexture("enemy", "image/enemy1_ani.png");
 
     // map = new Map("terrain", 1, 32);
     // map->LoadMap("assets/map.map", 30, 20);
@@ -121,9 +121,12 @@ void Game::Update()
     // camera.y = player.getComponent<TransformComponent>().position.y - 320;
     camera.x = players[0]->getComponent<TransformComponent>().position.x - 480;
     camera.y = players[0]->getComponent<TransformComponent>().position.y - 320;
-    playerRect.x = players[0]->getComponent<TransformComponent>().position.x;
-    playerRect.y = players[0]->getComponent<TransformComponent>().position.y;
-    
+
+    playerRect.w = players[0]->getComponent<SpriteComponent>().playersRect.w;
+    playerRect.h = players[0]->getComponent<SpriteComponent>().playersRect.h;  
+    playerRect.x = players[0]->getComponent<SpriteComponent>().playersRect.x;
+    playerRect.y = players[0]->getComponent<SpriteComponent>().playersRect.y;
+
     if(camera.x < 0)
     {
         camera.x = 0;

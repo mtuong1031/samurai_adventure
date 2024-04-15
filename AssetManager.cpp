@@ -31,8 +31,8 @@ void AssetManager::CreateEnemies(Vector2D pos, Vector2D vel, int range, int spee
     auto& enemy(manager->addEntity());
 
     enemy.addComponent<TransformComponent>(pos.x, pos.y, 64, 64, 1);
-    enemy.addComponent<SpriteComponent>(id, true);
-    enemy.addComponent<TheEnemies>(range, speed, vel);
+    enemy.addComponent<SpriteComponent>(id, true, 12, 150, 64, 64, 160, 64);
+    enemy.addComponent<TheEnemies>(pos, range, speed, vel);
     enemy.addComponent<ColliderComponent>("enemy");
     enemy.addGroup(Game::groupEnemies);
 }
