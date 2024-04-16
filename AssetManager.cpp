@@ -7,24 +7,32 @@ AssetManager::AssetManager(Manager* man) : manager(man)
 
 AssetManager::~AssetManager() {    }
 
+void AssetManager::CreateProjectile(Vector2D pos, Vector2D vel, int range, int speed, std::string id) {
+    auto& projectile(manager->addEntity());
+
+    projectile.addComponent<TransformComponent>(pos.x, pos.y, 64, 64, 1);
+    projectile.addComponent<SpriteComponent>(id, false);
+    projectile.addComponent<ProjectileComponent>(range, speed, vel);
+    projectile.addComponent<ColliderComponent>("projectile");
+    projectile.addGroup(Game::groupProjectiles);
+}
+
 void AssetManager::CreatePlayer(Vector2D pos, int speed, std::string id) {
     auto& player(manager->addEntity());
+    Vector2D bulletVel(2, 0);
 
     player.addComponent<TransformComponent>(pos.x, pos.y, 80, 60, 1);
     player.addComponent<SpriteComponent>(id, true);
     player.addComponent<KeyboardControler>();
     player.addComponent<ColliderComponent>("player");
+
+    // bulletVel.x = player.getComponent<KeyboardControler>().BulletVel.x;
+    // bulletVel.y = player.getComponent<KeyboardControler>().BulletVel.y;
+
+    AssetManager::CreateProjectile(pos, bulletVel, 200, 2, "projectile");
+    
+
     player.addGroup(Game::groupPlayers);
-}
-
-void AssetManager::CreateProjectile(Vector2D pos, Vector2D vel, int range, int speed, std::string id) {
-    auto& projectile(manager->addEntity());
-
-    projectile.addComponent<TransformComponent>(pos.x, pos.y, 32, 32, 1);
-    projectile.addComponent<SpriteComponent>(id, false);
-    projectile.addComponent<ProjectileComponent>(range, speed, vel);
-    projectile.addComponent<ColliderComponent>("projectile");
-    projectile.addGroup(Game::groupProjectiles);
 }
 
 void AssetManager::CreateEnemies(Vector2D pos, Vector2D vel, int range, int speed, std::string id) {
@@ -34,6 +42,15 @@ void AssetManager::CreateEnemies(Vector2D pos, Vector2D vel, int range, int spee
     enemy.addComponent<SpriteComponent>(id, true, 12, 150, 64, 64, 160, 64);
     enemy.addComponent<TheEnemies>(pos, range, speed, vel);
     enemy.addComponent<ColliderComponent>("enemy");
+    // enemy.getComponent<TheEnemies>().original_vector = pos;
+
+    // float length = sqrt(pow(Game::playerRect.x - pos.x, 2) + pow(Game::playerRect.y - pos.y, 2));
+    // float dx = (Game::playerRect.x - pos.x) / length;
+    // float dy = (Game::playerRect.y - pos.y) / length;
+    // vel.x = dx;
+    // vel.y = dy;
+
+    // AssetManager::CreateProjectile(pos, vel, range, speed, "projectile");
     enemy.addGroup(Game::groupEnemies);
 }
 

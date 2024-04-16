@@ -1,14 +1,23 @@
 #pragma
 
+#include <unordered_map>
+
 #include "ECS.h"
 #include "Component.h"
 #include "../Game.h"
 #include "../Vector2D.h"
 #include "../Collision.h"
 
+const int ATTACK_FRAME = 3;
+
 class TheEnemies : public Component
 {
     public:
+
+        Uint32 lastick;
+        std::unordered_map<const char*, int> cooldowns; 
+        int currentFrame = 0;
+
         TheEnemies(Vector2D OriVel, int rng, int spd, Vector2D vel)
             :  original_vector(OriVel), range(rng), speed(spd), velocity(vel)
         {   }
@@ -23,6 +32,10 @@ class TheEnemies : public Component
             collider = &entity->getComponent<ColliderComponent>();
             
             transform->velocity = velocity;
+            cooldowns = {
+                {"Attack", 1000},
+                {"Hit", 100}
+            };
         }
 
         void update() override
@@ -62,9 +75,32 @@ class TheEnemies : public Component
                     && Game::playerRect.y < transform->position.y + attackRange) 
                 {
                     attacking = true;
-                    transform->velocity.x = 0;
-                    transform->velocity.y = 0;
-                    sprite->Play("Attack");
+                    if (dx > 0) {
+                        sprite->spriteFlip = SDL_FLIP_NONE;
+                    } else {
+                        sprite->spriteFlip = SDL_FLIP_HORIZONTAL;
+                    }
+                    // transform->velocity.x = 0;
+                    // transform->velocity.y = dx * 0.1;
+                    // if (SDL_GetTicks() - cooldown > attackSpeed) {
+                    //     sprite->Play("Attack");
+                    //     cooldown = SDL_GetTicks();
+                    // }
+                    if (Game::playerRect.y + Game::playerRect.h > transform->position.y
+                        && Game::playerRect.y < transform->position.y + transform->height) 
+                    {
+                        transform->velocity.x = 0;
+                        transform->velocity.y = 0;
+                            
+                            sprite->Play("Attack");
+                            attacking = true;
+                            currentFrame++;
+                            lastick = SDL_GetTicks();
+                            if (currentFrame == ATTACK_FRAME) {
+                                // Game::playerHealth -= damage;
+                                // std::cout << "Player Health: " << Game::playerHealth << std::endl;
+                            }
+                    }
                 } else {
                     attacking = false;
                 }
@@ -89,20 +125,42 @@ class TheEnemies : public Component
                 } else if (back_dx < 0) {
                     sprite->spriteFlip = SDL_FLIP_HORIZONTAL;
                     sprite->Play("Run");
-                } else if(transform->position.x == original_vector.x && transform->position.y == original_vector.y)
+                } else
                 {
                 sprite->Play("Idle");
                 }
             }
             
             // 
-            if (Collision::AAABB(colliderRect, Game::playerRect)) {
-                health -= 1;
+            bool check = false;
+            if (transform->position.x < Game::playerRect.x && attacking) {
+                Game::playerRect.x -= 196;
+                check = true;
+            }
+            if (Collision::AAABB(colliderRect, Game::playerRect) && attacking) 
+            {
+                transform->position.x += -dx*2;
                 transform->velocity.x = -dx*0.1;
-                sprite->spriteFlip = SDL_FLIP_NONE;
-                sprite->Play("Hit");
-                std::cout << "Enemy hit player" << std::endl;
-                hit = true;
+                if (dx > 0) {
+                    sprite->spriteFlip = SDL_FLIP_NONE;
+                } else {
+                    sprite->spriteFlip = SDL_FLIP_HORIZONTAL;
+                }
+                    
+                if (SDL_GetTicks() - lastick > cooldowns["Hit"]) {
+                    sprite->Play("Hit");
+                    health -= 10;
+                    lastick = SDL_GetTicks();
+                    std::cout << "Health of Enemy: " << health << std::endl;
+                } else {
+                    sprite->Play("Idle");
+                    std::cout << "Enemy is hit" << std::endl;
+                }       
+            }
+
+            if (check) {
+                Game::playerRect.x += 196;
+                check = false;
             }
 
             if (health <= 0)
@@ -116,6 +174,7 @@ class TheEnemies : public Component
             }
 
         }
+
     private:
         TransformComponent *transform;
         SpriteComponent *sprite;
@@ -134,7 +193,5 @@ class TheEnemies : public Component
         bool isDead = false;
         int health = 100;
         int damage = 10;
-        int attackSpeed = 100;
-        int cooldown = 1000;
 
 };

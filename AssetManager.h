@@ -13,8 +13,8 @@ class AssetManager
         ~AssetManager();
 
         //Quản lí game object
-        void CreatePlayer(Vector2D pos, int speed, std::string id);
         void CreateProjectile(Vector2D pos, Vector2D vel, int range, int speed, std::string id);
+        void CreatePlayer(Vector2D pos, int speed, std::string id);
         void CreateEnemies(Vector2D pos, Vector2D vel, int range, int speed, std::string id);
         //Quản lý texture
         void AddTexture(std::string id, const char* path);
