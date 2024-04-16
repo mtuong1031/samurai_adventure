@@ -3,34 +3,37 @@
 #include "ECS.h"
 #include "../Vector2D.h"
 #include "Component.h"
+#include "../Collision.h"
 
 
 class ProjectileComponent : public Component {
     public:
+        Vector2D pos;
+
         ProjectileComponent(int rng, int spd, Vector2D vel)
             : range(rng), speed(spd), velocity(vel) {    }
+
+        ProjectileComponent(Vector2D vel)
+        {
+            pos.x = vel.x;
+            pos.y = vel.y;
+        }
 
         ~ProjectileComponent() 
         {    }
 
         void init() override {
             transform = &entity->getComponent<TransformComponent>();
+            sprite = &entity->getComponent<SpriteComponent>();
             transform->velocity = velocity;
         }
 
         void update() override {
-            distance += speed;
-
-            if (distance > range)
-                entity->destroy();
-            else if (transform->position.x > Game::camera.x + Game::camera.w ||
-                    transform->position.x < Game::camera.x ||
-                    transform->position.y > Game::camera.y + Game::camera.h ||
-                    transform->position.y < Game::camera.y)
-                        entity->destroy();
+            sprite->Play("Idle");
         }
     private:
         TransformComponent *transform;
+        SpriteComponent *sprite;
         Vector2D velocity;
         
         int range = 0;

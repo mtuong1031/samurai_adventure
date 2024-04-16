@@ -14,8 +14,9 @@ SDL_Event Game::event;
 
 // SDL_Rect Game::camera = {0, 0, map->getScaledSize() * map->getSizeX() - WINDOW_WIDTH, 
 //                                 map->getScaledSize() * map->getSizeY() - WINDOW_HEIGHT};
-SDL_Rect Game::camera = {0, 0, 960, 0};
+SDL_Rect Game::camera = {0, 0, 1279, 0};
 SDL_Rect Game::playerRect = {0, 0, 64, 80};  // x y w h
+SDL_Rect background = {0, 0, 1279, 540};
 
 AssetManager* Game::assets = new AssetManager(&manager);
 
@@ -48,9 +49,11 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
     }
 
     assets->AddTexture("terrain", "assets/tileset.png");
+    assets->AddTexture("background", "image/ParallaxBackground.png");
     // assets->AddTexture("player", "image/ani_sd.png");
-    assets->AddTexture("player", "image/animatinons_char1.png");
-    assets->AddTexture("projectile", "image/proj.png");
+    assets->AddTexture("player", "image/tuong.png");
+    assets->AddTexture("arrow", "image/arrow.png");
+    assets->AddTexture("hp", "image/hp.png");
     assets->AddTexture("enemy", "image/enemy1_ani.png");
 
     // map = new Map("terrain", 1, 32);
@@ -61,8 +64,13 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
     // thực hiện khởi tạo các thành phần của player
     assets->CreatePlayer(Vector2D(300, 300), 200, "player");
  
+    assets->CreateProjectile(Vector2D(300, 100), Vector2D(0, 0), 200, 2, "hp");
+    assets->CreateProjectile(Vector2D(100, 300), Vector2D(0, 0), 200, 2, "hp");
+    assets->CreateProjectile(Vector2D(300, 400), Vector2D(0, 0), 200, 2, "hp");
+    assets->CreateProjectile(Vector2D(200, 300), Vector2D(0, 0), 200, 2, "hp");
     // thực hiện khởi tạo các thành phần của enemy
     assets->CreateEnemies(Vector2D(600, 100), Vector2D(0,0), 200, 1, "enemy");
+    assets->CreateEnemies(Vector2D(300, 100), Vector2D(0,0), 200, 1, "enemy");
 }
 
 auto& tiles(manager.getGroup(Game::groupMap));
@@ -117,6 +125,23 @@ void Game::Update()
 
     }
 
+    for (auto& p : projectiles) {
+        if (Collision::AAABB(playerCol, p->getComponent<ColliderComponent>().collider))
+        {
+            std::cout << "Player hit projectile" << std::endl;
+        }
+    }
+
+    if (players[0]->getComponent<KeyboardControler>().health <= 0)
+    {
+        players[0]->destroy();
+        std::cout << "Player is dead" << std::endl;
+    }
+
+    Vector2D bullet_vel(0, 0);
+    bullet_vel = players[0]->getComponent<KeyboardControler>().BulletVel;
+    assets->CreateProjectile(playerPos, bullet_vel, 200, 2, "hp");
+
     // camera.x = player.getComponent<TransformComponent>().position.x - 480;
     // camera.y = player.getComponent<TransformComponent>().position.y - 320;
     camera.x = players[0]->getComponent<TransformComponent>().position.x - 480;
@@ -148,6 +173,8 @@ void Game::Update()
 
 void Game::Render() {
     SDL_RenderClear(renderer);
+
+    TextureManager::Draw(assets->GetTexture("background"), background, background, SDL_FLIP_NONE);
     // thực hiện vẽ map
     for (auto& t : tiles) {
         t->Draw();
@@ -166,6 +193,10 @@ void Game::Render() {
     for (auto& e : enemies)
     {
         e->Draw();
+    }
+
+    for (auto& p : projectiles) {
+        p->Draw();
     }
 
     SDL_RenderPresent(renderer);

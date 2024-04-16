@@ -11,7 +11,7 @@ void AssetManager::CreateProjectile(Vector2D pos, Vector2D vel, int range, int s
     auto& projectile(manager->addEntity());
 
     projectile.addComponent<TransformComponent>(pos.x, pos.y, 64, 64, 1);
-    projectile.addComponent<SpriteComponent>(id, false);
+    projectile.addComponent<SpriteComponent>(id, true, 5, 200, 32, 7, 16 , 16);
     projectile.addComponent<ProjectileComponent>(range, speed, vel);
     projectile.addComponent<ColliderComponent>("projectile");
     projectile.addGroup(Game::groupProjectiles);
@@ -19,17 +19,17 @@ void AssetManager::CreateProjectile(Vector2D pos, Vector2D vel, int range, int s
 
 void AssetManager::CreatePlayer(Vector2D pos, int speed, std::string id) {
     auto& player(manager->addEntity());
-    Vector2D bulletVel(2, 0);
+    Vector2D bulletVel(0, 0);
 
-    player.addComponent<TransformComponent>(pos.x, pos.y, 80, 60, 1);
+    player.addComponent<TransformComponent>(pos.x, pos.y, 19, 19, 4);
     player.addComponent<SpriteComponent>(id, true);
     player.addComponent<KeyboardControler>();
     player.addComponent<ColliderComponent>("player");
 
     // bulletVel.x = player.getComponent<KeyboardControler>().BulletVel.x;
     // bulletVel.y = player.getComponent<KeyboardControler>().BulletVel.y;
-
-    AssetManager::CreateProjectile(pos, bulletVel, 200, 2, "projectile");
+    bulletVel = player.getComponent<KeyboardControler>().BulletVel;
+    AssetManager::CreateProjectile(pos, bulletVel, 200, 2, "hp");
     
 
     player.addGroup(Game::groupPlayers);
@@ -39,7 +39,7 @@ void AssetManager::CreateEnemies(Vector2D pos, Vector2D vel, int range, int spee
     auto& enemy(manager->addEntity());
 
     enemy.addComponent<TransformComponent>(pos.x, pos.y, 64, 64, 1);
-    enemy.addComponent<SpriteComponent>(id, true, 12, 150, 64, 64, 160, 64);
+    enemy.addComponent<SpriteComponent>(id, true, 12, 500, 64, 64, 160, 64);
     enemy.addComponent<TheEnemies>(pos, range, speed, vel);
     enemy.addComponent<ColliderComponent>("enemy");
     // enemy.getComponent<TheEnemies>().original_vector = pos;

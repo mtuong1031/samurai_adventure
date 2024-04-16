@@ -40,17 +40,21 @@ class SpriteComponent : public Component {
         {
             animated = isAnimated;
 
-            Animation idle = Animation(0, 5, 100, 64, 80);
-            Animation run = Animation(1, 8, 100, 64, 80);
-            Animation attack_x = Animation(2, 8, 10, 196, 112);
-            Animation attack_gun = Animation(3, 8, 100, 91, 80);
-            Animation hit = Animation(4, 5, 150, 64, 80);
+            Animation idle = Animation(0, 2, 200, 19, 19);
+            Animation run = Animation(1, 4, 100, 19, 19);
+            Animation run_up = Animation(2, 4, 100, 19, 19);
+            Animation rool = Animation(3, 4, 100, 19, 19);
+            Animation attack_x = Animation(4, 4, 100, 30, 30);
+            Animation attack_up = Animation(5, 4, 100, 30, 30);
+            Animation attack_dow = Animation(6, 4, 100, 30, 30);
 
-            animations.emplace("Idle", idle);   
+            animations.emplace("Idle", idle);
             animations.emplace("Run", run);
-            animations.emplace("AttackX", attack_x);
-            animations.emplace("AttackGun", attack_gun);
-            animations.emplace("Hit", hit);
+            animations.emplace("Run_up", run_up);
+            animations.emplace("Rool", rool);
+            animations.emplace("Attack_x", attack_x);
+            animations.emplace("Attack_up", attack_up);
+            animations.emplace("Attack_dow", attack_dow);
 
             Play("Idle");          
 
@@ -64,7 +68,7 @@ class SpriteComponent : public Component {
 
             Animation idle = Animation(0, numFrames, speed, width, height);
             Animation run = Animation(1, numFrames, speed, width, height);
-            Animation attack = Animation(2, numFrames, 10, rattck_width, attack_height);
+            Animation attack = Animation(2, numFrames, 100, rattck_width, attack_height);
             Animation hit = Animation(3, numFrames, 500, width, height);
 
             animations.emplace("Idle", idle);   
@@ -101,21 +105,23 @@ class SpriteComponent : public Component {
             srcRect.w = animations[currentAnimationName].width;
             srcRect.h = animations[currentAnimationName].height;
 
-            playersRect.h = animations[currentAnimationName].height;
-            playersRect.w = animations[currentAnimationName].width;
+            playersRect.h = animations[currentAnimationName].height*transform->scale;
+            playersRect.w = animations[currentAnimationName].width*transform->scale;
 
             if (spriteFlip == SDL_FLIP_HORIZONTAL) {
-                destRect.x = static_cast<int>(transform->position.x) - Game::camera.x - animations[currentAnimationName].width + transform->width;
+                destRect.x = static_cast<int>(transform->position.x)
+                - animations[currentAnimationName].width*transform->scale + transform->width*transform->scale;
             } else {
-                destRect.x = static_cast<int>(transform->position.x) - Game::camera.x;
+                destRect.x = static_cast<int>(transform->position.x);
             }
+            playersRect.x = destRect.x - transform->width*transform->scale/3;
 
-            destRect.y = static_cast<int>(transform->position.y) - Game::camera.y - animations[currentAnimationName].height + transform->height; 
+            destRect.x -= Game::camera.x;
+            destRect.y = static_cast<int>(transform->position.y) - Game::camera.y; 
             destRect.w = animations[currentAnimationName].width * transform->scale;
             destRect.h = animations[currentAnimationName].height * transform->scale;
 
-            playersRect.x = destRect.x;
-            playersRect.y = destRect.y;
+            playersRect.y = transform->position.y;
         }
 
         void draw() override {

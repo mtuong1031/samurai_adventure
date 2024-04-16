@@ -10,10 +10,13 @@ class KeyboardControler : public Component
         Uint32 lastTick;
         Vector2D BulletVel;
 
+        int health = 100;
+        bool isDead = false;
+
         void init() override {
             transform = &entity->getComponent<TransformComponent>();
             sprite = &entity->getComponent<SpriteComponent>();
-            BulletVel = {2, 0};
+            BulletVel = {0, 0};
         }
 
         void update() override 
@@ -52,28 +55,32 @@ class KeyboardControler : public Component
                 switch (Game::event.key.keysym.sym) {
                 case SDLK_w:
                     transform->velocity.y = -1;
-                    sprite->Play("Run");
+                    sprite->Play("Run_up");
+                    BulletVel = {0, 1};
                     break;
                 case SDLK_a:
                     transform->velocity.x = -1;
                     sprite->Play("Run");
                     sprite->spriteFlip = SDL_FLIP_HORIZONTAL;
-                    
+                    BulletVel = {-1, 0};
                     break;
                 case SDLK_s:
                     transform->velocity.y = 1;
                     sprite->Play("Run");
+                    BulletVel = {0, -1};
                     break;
                 case SDLK_d:
                     transform->velocity.x = 1;
                     sprite->Play("Run");
                     sprite->spriteFlip = SDL_FLIP_NONE;
+                    BulletVel = {1, 0};
                     break;
                 case SDLK_j:
                     transform->velocity.x = 0;
-                    sprite->Play("AttackGun");
-                    BulletVel.x = 1;
-                    BulletVel.y = 0;
+                    sprite->Play("Attack_x");
+                    break;
+                case SDLK_LSHIFT:
+                    sprite->Play("Rool");
                     break;
                 case SDLK_ESCAPE:
                     Game::isRunning = false;
@@ -103,36 +110,9 @@ class KeyboardControler : public Component
                     sprite->spriteFlip = SDL_FLIP_NONE;
                     break;
                 case SDLK_j:
-                    transform->velocity.x = 0;
                     sprite->Play("Idle");
                     break;
-                default:
-                    break;
-                }
-            }
-
-            if(Game::event.type == SDL_MOUSEBUTTONDOWN)
-            {
-                switch (Game::event.button.button)
-                {
-                case SDL_BUTTON_LEFT:
-                    sprite->Play("AttackX");
-                    currentFrame++;
-                    transform->velocity.x = 0;
-                    isAnimating = true;
-                    lastTick = SDL_GetTicks();
-                    currentAnimationName = "AttackX";
-                    break;
-                default:
-                    break;
-                }
-            }
-            if(Game::event.type == SDL_MOUSEBUTTONUP)
-            {
-                switch (Game::event.button.button)
-                {
-                case SDL_BUTTON_LEFT:
-                    transform->velocity.x = 0;
+                case SDLK_LSHIFT:
                     sprite->Play("Idle");
                     break;
                 default:
@@ -142,16 +122,17 @@ class KeyboardControler : public Component
         }
     
     private:
+        const char* currentAnimationName;
+        TransformComponent *transform;
+        SpriteComponent *sprite;
+        Vector2D velocity;
+
         int currentFrame = 0;
         int height;
         int width;
         bool isAnimating = false;
         bool isAttacking = false;
         bool isShooting = false;
-        const char* currentAnimationName;
-        TransformComponent *transform;
-        SpriteComponent *sprite;
-        Vector2D velocity;
 
 };
 
