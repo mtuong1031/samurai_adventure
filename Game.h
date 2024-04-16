@@ -41,6 +41,7 @@ class Game
             groupColliders,
             groupProjectiles,
             groupEnemies,
+            groupEffects,
         };
 
     private:

@@ -50,11 +50,11 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
 
     assets->AddTexture("terrain", "assets/tileset.png");
     assets->AddTexture("background", "image/ParallaxBackground.png");
-    // assets->AddTexture("player", "image/ani_sd.png");
     assets->AddTexture("player", "image/tuong.png");
     assets->AddTexture("arrow", "image/arrow.png");
     assets->AddTexture("hp", "image/hp.png");
     assets->AddTexture("enemy", "image/enemy1_ani.png");
+    assets->AddTexture("effect", "image/effect_attack_1.png");
 
     // map = new Map("terrain", 1, 32);
     // map->LoadMap("assets/map.map", 30, 20);
@@ -66,8 +66,8 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
  
     assets->CreateProjectile(Vector2D(300, 100), Vector2D(0, 0), 200, 2, "hp");
     assets->CreateProjectile(Vector2D(100, 300), Vector2D(0, 0), 200, 2, "hp");
-    assets->CreateProjectile(Vector2D(300, 400), Vector2D(0, 0), 200, 2, "hp");
-    assets->CreateProjectile(Vector2D(200, 300), Vector2D(0, 0), 200, 2, "hp");
+    assets->CreateEffect(Vector2D(100, 100), Vector2D(0, 0), 200, 2, "effect");
+    assets->CreateEffect(Vector2D(500, 300), Vector2D(0, 0), 200, 2, "effect");
     // thực hiện khởi tạo các thành phần của enemy
     assets->CreateEnemies(Vector2D(600, 100), Vector2D(0,0), 200, 1, "enemy");
     assets->CreateEnemies(Vector2D(300, 100), Vector2D(0,0), 200, 1, "enemy");
@@ -78,6 +78,7 @@ auto& players(manager.getGroup(Game::groupPlayers));
 auto& colliders(manager.getGroup(Game::groupColliders));
 auto& projectiles(manager.getGroup(Game::groupProjectiles));
 auto& enemies(manager.getGroup(Game::groupEnemies));
+auto& effects(manager.getGroup(Game::groupEffects));
 
 void Game::HandleEvents() 
 {
@@ -94,9 +95,6 @@ void Game::HandleEvents()
 
 void Game::Update() 
 {
-
-    // SDL_Rect playerCol = player.getComponent<ColliderComponent>().collider;
-    // Vector2D playerPos = player.getComponent<TransformComponent>().position;
     SDL_Rect playerCol = players[0]->getComponent<ColliderComponent>().collider;
     Vector2D playerPos = players[0]->getComponent<TransformComponent>().position;
 
@@ -118,9 +116,12 @@ void Game::Update()
         Vector2D ePos = e->getComponent<TransformComponent>().position;
         Vector2D eVel = e->getComponent<TransformComponent>().velocity;
         
-        if (Collision::AAABB(playerCol, eCol))
-        {
-            std::cout << "Player hit enemy" << std::endl;
+        Vector2D pVel = e->getComponent<TheEnemies>().getDirection(playerPos);
+
+        bool Attack = e->getComponent<TheEnemies>().isAttacking;
+        if (Attack) {
+            assets->CreateEffect(ePos, Vector2D(0, 0), 200, 2, "effect");
+            assets->CreateProjectile(ePos, pVel, 200, 2, "hp");
         }
 
     }
@@ -128,7 +129,7 @@ void Game::Update()
     for (auto& p : projectiles) {
         if (Collision::AAABB(playerCol, p->getComponent<ColliderComponent>().collider))
         {
-            std::cout << "Player hit projectile" << std::endl;
+            //
         }
     }
 
@@ -139,8 +140,8 @@ void Game::Update()
     }
 
     Vector2D bullet_vel(0, 0);
-    bullet_vel = players[0]->getComponent<KeyboardControler>().BulletVel;
-    assets->CreateProjectile(playerPos, bullet_vel, 200, 2, "hp");
+    // bullet_vel = players[0]->getComponent<KeyboardControler>().BulletVel;
+    // assets->CreateProjectile(playerPos, bullet_vel, 200, 2, "hp");
 
     // camera.x = player.getComponent<TransformComponent>().position.x - 480;
     // camera.y = player.getComponent<TransformComponent>().position.y - 320;
@@ -179,11 +180,6 @@ void Game::Render() {
     for (auto& t : tiles) {
         t->Draw();
     }
-
-    // for (auto& c : colliders)
-    // {
-    //     c->Draw();
-    // }
 
     // thực hiện vẽ player
     for (auto& p : players) {

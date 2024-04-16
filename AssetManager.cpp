@@ -17,6 +17,16 @@ void AssetManager::CreateProjectile(Vector2D pos, Vector2D vel, int range, int s
     projectile.addGroup(Game::groupProjectiles);
 }
 
+void AssetManager::CreateEffect(Vector2D pos, Vector2D vel, int range, int speed, std::string id) {
+    auto& effect(manager->addEntity());
+
+    effect.addComponent<TransformComponent>(pos.x, pos.y, 64, 64, 1);
+    effect.addComponent<SpriteComponent>(id, true, 8, 200, 375, 150, 16 , 16);
+    effect.addComponent<ProjectileComponent>(range, speed, vel);
+    effect.addComponent<ColliderComponent>("effect");
+    effect.addGroup(Game::groupEffects);
+}
+
 void AssetManager::CreatePlayer(Vector2D pos, int speed, std::string id) {
     auto& player(manager->addEntity());
     Vector2D bulletVel(0, 0);
