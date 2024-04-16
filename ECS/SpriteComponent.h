@@ -24,12 +24,9 @@ class SpriteComponent : public Component {
 
         int anieIndex = 0;
         const char* currentAnimationName;
-        Uint32 aniStartTime = 0;
         SDL_Rect playersRect;
-        bool Attack_lr = false;
 
         std::map<const char*, Animation> animations;
-
         // set hướng
         SDL_RendererFlip spriteFlip = SDL_FLIP_NONE;
 
@@ -43,15 +40,9 @@ class SpriteComponent : public Component {
         {
             animated = isAnimated;
 
-            // Animation idle = Animation(0, 4, 200, 64, 64);
-            // Animation run = Animation(1, 6, 100, 48, 64);
-            // Animation attack_x = Animation(2, 8, 50, 112, 80);
-            // Animation hit = Animation(3, 4, 150, 64, 64);
-            // Animation attack_dow = Animation(4, 8, 50, 112, 112);
-            // Animation attack_up = Animation(5, 8, 50, 128, 112);
             Animation idle = Animation(0, 5, 100, 64, 80);
             Animation run = Animation(1, 8, 100, 64, 80);
-            Animation attack_x = Animation(2, 8, 100, 196, 112);
+            Animation attack_x = Animation(2, 8, 10, 196, 112);
             Animation attack_gun = Animation(3, 8, 100, 91, 80);
             Animation hit = Animation(4, 5, 150, 64, 80);
 
@@ -60,10 +51,6 @@ class SpriteComponent : public Component {
             animations.emplace("AttackX", attack_x);
             animations.emplace("AttackGun", attack_gun);
             animations.emplace("Hit", hit);
-
-            // animations.emplace("Hit", hit);
-            // animations.emplace("AttackDow", attack_dow);
-            // animations.emplace("AttackUp", attack_up);
 
             Play("Idle");          
 
@@ -77,8 +64,8 @@ class SpriteComponent : public Component {
 
             Animation idle = Animation(0, numFrames, speed, width, height);
             Animation run = Animation(1, numFrames, speed, width, height);
-            Animation attack = Animation(2, numFrames, 150, rattck_width, attack_height);
-            Animation hit = Animation(3, numFrames, 150, width, height);
+            Animation attack = Animation(2, numFrames, 10, rattck_width, attack_height);
+            Animation hit = Animation(3, numFrames, 500, width, height);
 
             animations.emplace("Idle", idle);   
             animations.emplace("Run", run);
@@ -100,9 +87,7 @@ class SpriteComponent : public Component {
         void init() override 
         {
             transform = &entity->getComponent<TransformComponent>();  // lấy vị trí của entity
-
             srcRect.x = srcRect.y = 0;
-            
             srcRect.w = transform->width;
             srcRect.h = transform->height; 
         }
@@ -119,12 +104,13 @@ class SpriteComponent : public Component {
             playersRect.h = animations[currentAnimationName].height;
             playersRect.w = animations[currentAnimationName].width;
 
-            if (spriteFlip == SDL_FLIP_NONE) {
-                destRect.x = static_cast<int>(transform->position.x) - Game::camera.x;
+            if (spriteFlip == SDL_FLIP_HORIZONTAL) {
+                destRect.x = static_cast<int>(transform->position.x) - Game::camera.x - animations[currentAnimationName].width + transform->width;
             } else {
-                destRect.x = static_cast<int>(transform->position.x) - Game::camera.x - animations[currentAnimationName].width + transform->width * transform->scale;
+                destRect.x = static_cast<int>(transform->position.x) - Game::camera.x;
             }
-            destRect.y = static_cast<int>(transform->position.y) - Game::camera.y - animations[currentAnimationName].height + transform->height * transform->scale; 
+
+            destRect.y = static_cast<int>(transform->position.y) - Game::camera.y - animations[currentAnimationName].height + transform->height; 
             destRect.w = animations[currentAnimationName].width * transform->scale;
             destRect.h = animations[currentAnimationName].height * transform->scale;
 
@@ -143,7 +129,5 @@ class SpriteComponent : public Component {
             frames = animations[animName].frames;
             anieIndex = animations[animName].index;
             speed = animations[animName].speed;
-
-            aniStartTime = SDL_GetTicks();  
         }
 };

@@ -8,10 +8,12 @@ class KeyboardControler : public Component
 {
     public:
         Uint32 lastTick;
+        Vector2D BulletVel;
 
         void init() override {
             transform = &entity->getComponent<TransformComponent>();
             sprite = &entity->getComponent<SpriteComponent>();
+            BulletVel = {2, 0};
         }
 
         void update() override 
@@ -56,7 +58,7 @@ class KeyboardControler : public Component
                     transform->velocity.x = -1;
                     sprite->Play("Run");
                     sprite->spriteFlip = SDL_FLIP_HORIZONTAL;
-                    sprite->Attack_lr = true;
+                    
                     break;
                 case SDLK_s:
                     transform->velocity.y = 1;
@@ -66,11 +68,12 @@ class KeyboardControler : public Component
                     transform->velocity.x = 1;
                     sprite->Play("Run");
                     sprite->spriteFlip = SDL_FLIP_NONE;
-                    sprite->Attack_lr = false;
                     break;
                 case SDLK_j:
                     transform->velocity.x = 0;
                     sprite->Play("AttackGun");
+                    BulletVel.x = 1;
+                    BulletVel.y = 0;
                     break;
                 case SDLK_ESCAPE:
                     Game::isRunning = false;
@@ -89,7 +92,6 @@ class KeyboardControler : public Component
                     transform->velocity.x = 0;
                     sprite->Play("Idle");  
                     sprite->spriteFlip = SDL_FLIP_HORIZONTAL; 
-                    sprite->Attack_lr = true;
                     break;
                 case SDLK_s:
                     transform->velocity.y = 0;
@@ -99,7 +101,6 @@ class KeyboardControler : public Component
                     transform->velocity.x = 0;
                     sprite->Play("Idle");
                     sprite->spriteFlip = SDL_FLIP_NONE;
-                    sprite->Attack_lr = false;
                     break;
                 case SDLK_j:
                     transform->velocity.x = 0;
