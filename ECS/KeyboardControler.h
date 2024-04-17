@@ -7,7 +7,7 @@
 class KeyboardControler : public Component
 {
     public:
-        Uint32 lastTick;
+        Uint32 lastTick = 0;
         Vector2D BulletVel;
         SDL_RendererFlip flip = SDL_FLIP_NONE;
 
@@ -84,6 +84,7 @@ class KeyboardControler : public Component
                     transform->velocity.y = 0;
                     sprite->Play("Attack_x");
                     isAttacking = true;
+                    lastTick = SDL_GetTicks();
                     break;
                 case SDLK_LSHIFT:
                     sprite->Play("Rool");
@@ -99,7 +100,7 @@ class KeyboardControler : public Component
                 switch (Game::event.key.keysym.sym) {
                 case SDLK_w:
                     transform->velocity.y = 0;
-                    sprite->Play("Idle");
+                    sprite->Play("Idle_up");
                     break;
                 case SDLK_a:
                     transform->velocity.x = 0;

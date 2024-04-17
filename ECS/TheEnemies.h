@@ -19,10 +19,12 @@ class TheEnemies : public Component
         Uint32 lastick = 0;
         std::unordered_map<const char*, int> cooldowns; 
         int currentFrame = 0;
+        bool attack_frame = false;
         const char* currentAnimation;
 
         int health = 100;
         int damage = 10;
+        bool hit = false;
         bool isAttacking;
 
         TheEnemies(Vector2D OriVel, int rng, int spd, Vector2D vel)
@@ -65,13 +67,13 @@ class TheEnemies : public Component
             float back_dx = (original_vector.x - transform->position.x) / backLength;
             float back_dy = (original_vector.y - transform->position.y) / backLength;
 
-            hit = false;
             // Move to the player
             if (Game::playerRect.x > transform->position.x - range
                 && Game::playerRect.x < transform->position.x + range
                 && Game::playerRect.y > transform->position.y - range
                 && Game::playerRect.y < transform->position.y + range) 
             {
+                isAttacking = true;
                 inRange = true;
                 transform->velocity.x = dx * 0.1;
                 transform->velocity.y = dy * 0.1;
@@ -96,17 +98,17 @@ class TheEnemies : public Component
                         transform->velocity.y = 0;
                         // if (SDL_GetTicks() - lastick >= cooldowns["Attack"]) {
                             sprite->Play("Attack");
-                            isAttacking = true;
+                            
                             currentFrame++;
                             lastick = SDL_GetTicks();
                         // }
-                } else 
-                    isAttacking = false;
+                }
             } else {
                 transform->velocity.x = 0;
                 transform->velocity.y = 0;
                 sprite->Play("Idle");
                 inRange = false;
+                isAttacking = false;
             }
 
             // Di chuyển về địa chỉ gốc
@@ -126,6 +128,14 @@ class TheEnemies : public Component
                 }
             }
 
+            if (hit) {
+                sprite->Play("Hit");
+                transform->position.x -= transform->velocity.x * 2;
+                transform->position.y -= transform->velocity.y * 2;
+                std::cout << "Hit  " << std::endl;
+                hit = false;
+            }
+
             if (health <= 0)
             {
                 isDead = true;
@@ -136,7 +146,12 @@ class TheEnemies : public Component
                 std::cout << "Enemy is dead" << std::endl;
             }
 
-
+            if (currentFrame >= sprite->animations[sprite->currentAnimationName].frames)
+            {
+                currentFrame = 0;
+                sprite->Play("Idle");
+                attack_frame = false;
+            } else attack_frame = true;
         }
 
     private:
@@ -148,6 +163,5 @@ class TheEnemies : public Component
         int speed = 1;
         int attackRange = 100;
         bool inRange = false;
-        bool hit = false;
         bool isDead = false;
 };

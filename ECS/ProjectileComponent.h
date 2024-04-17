@@ -9,9 +9,16 @@
 class ProjectileComponent : public Component {
     public:
         Vector2D pos;
+        std::string id;
+        Uint32 lastTime = 0;
 
-        ProjectileComponent(int rng, int spd, Vector2D vel)
-            : range(rng), speed(spd), velocity(vel) {    }
+        ProjectileComponent(int rng, int spd, Vector2D vel, std::string id)
+        { 
+            range = rng;
+            speed = spd;
+            velocity = vel;
+            this->id = id;
+        }
 
         ProjectileComponent(Vector2D vel)
         {
@@ -29,13 +36,20 @@ class ProjectileComponent : public Component {
         }
 
         void update() override {
-            sprite->Play("Idle");
+            if (id == "hp") {
+                sprite->Play("Idle");
+                transform->velocity.x = velocity.x * 0.5;
+                transform->velocity.y = velocity.y * 0.5;
+            } 
+            if (id == "effect") {
+                sprite->Play("Idle");
+            }
         }
     private:
         TransformComponent *transform;
         SpriteComponent *sprite;
         Vector2D velocity;
-        
+    
         int range = 0;
         int speed = 0;
         int distance = 0;
