@@ -54,7 +54,7 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
     assets->AddTexture("arrow", "image/arrow.png");
     assets->AddTexture("hp", "image/hp.png");
     assets->AddTexture("enemy", "image/enemy1_ani.png");
-    assets->AddTexture("effect", "image/effect_attack_1.png");
+    assets->AddTexture("effect", "image/skill.png");
 
     // map = new Map("terrain", 1, 32);
     // map->LoadMap("assets/map.map", 30, 20);
@@ -66,8 +66,6 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
  
     assets->CreateProjectile(Vector2D(300, 100), Vector2D(0, 0), 200, 2, "hp");
     assets->CreateProjectile(Vector2D(100, 300), Vector2D(0, 0), 200, 2, "hp");
-    assets->CreateEffect(Vector2D(100, 100), Vector2D(0, 0), 200, 2, "effect");
-    assets->CreateEffect(Vector2D(500, 300), Vector2D(0, 0), 200, 2, "effect");
     // thực hiện khởi tạo các thành phần của enemy
     assets->CreateEnemies(Vector2D(600, 100), Vector2D(0,0), 200, 1, "enemy");
     assets->CreateEnemies(Vector2D(300, 100), Vector2D(0,0), 200, 1, "enemy");
@@ -111,28 +109,69 @@ void Game::Update()
         }
     }
 
+    // Xử lí các thành phần của Enemy
+    //////////////////////////////////////////
+    bool attackframe = false;
     for (auto& e : enemies) {
         SDL_Rect eCol = e->getComponent<ColliderComponent>().collider;
         Vector2D ePos = e->getComponent<TransformComponent>().position;
         Vector2D eVel = e->getComponent<TransformComponent>().velocity;
         
+        ePos.x -= 187 - 32;
+        ePos.y -= 60 - 32;
         Vector2D pVel = e->getComponent<TheEnemies>().getDirection(playerPos);
 
-        bool Attack = e->getComponent<TheEnemies>().isAttacking;
-        if (Attack) {
-            assets->CreateEffect(ePos, Vector2D(0, 0), 200, 2, "effect");
-            assets->CreateProjectile(ePos, pVel, 200, 2, "hp");
+        for (auto ef : effects) {
+            if (Collision::AAABB(eCol, ef->getComponent<ColliderComponent>().collider))
+            {
+                e->getComponent<TheEnemies>().health -= 1;
+                std::cout << "Enemy health: " << e->getComponent<TheEnemies>().health << std::endl;
+            }
         }
 
+        attackframe = e->getComponent<TheEnemies>().attack_frame;
     }
 
+    // Xử lí lớp đạn
     for (auto& p : projectiles) {
         if (Collision::AAABB(playerCol, p->getComponent<ColliderComponent>().collider))
         {
-            //
+            players[0]->getComponent<KeyboardControler>().health -= 0;
+            std::cout << "Player health: " << players[0]->getComponent<KeyboardControler>().health << std::endl;
         }
     }
 
+
+    // Xử lý kĩ năng của nhân vật
+    Uint32 lastick = 0;
+    SDL_RendererFlip flip = players[0]->getComponent<SpriteComponent>().spriteFlip;
+    bool isSkill = players[0]->getComponent<KeyboardControler>().isAttacking;
+    Vector2D skillRect;
+    if (SDL_GetTicks() - lastick >= 5000 && isSkill)
+    {
+        if (flip == SDL_FLIP_HORIZONTAL) 
+            skillRect = playerPos - Vector2D(57,0);
+        else 
+            skillRect = playerPos + Vector2D(57,0);
+
+        assets->CreateEffect(playerPos, Vector2D(0, 0), 200, 2, "effect", flip);
+        lastick = SDL_GetTicks();
+    } else {
+        isSkill = false;
+        for (auto& ef : effects) {
+            ef->destroy();
+        }
+    }
+
+    // for (auto& ef : effects) {
+    //     if (Collision::AAABB(playerCol, ef->getComponent<ColliderComponent>().collider))
+    //     {
+    //         players[0]->getComponent<KeyboardControler>().health -= 0;
+    //         std::cout << "Player health: " << players[0]->getComponent<KeyboardControler>().health << std::endl;
+    //     }
+    // }
+
+    // ss
     if (players[0]->getComponent<KeyboardControler>().health <= 0)
     {
         players[0]->destroy();
@@ -140,11 +179,6 @@ void Game::Update()
     }
 
     Vector2D bullet_vel(0, 0);
-    // bullet_vel = players[0]->getComponent<KeyboardControler>().BulletVel;
-    // assets->CreateProjectile(playerPos, bullet_vel, 200, 2, "hp");
-
-    // camera.x = player.getComponent<TransformComponent>().position.x - 480;
-    // camera.y = player.getComponent<TransformComponent>().position.y - 320;
     camera.x = players[0]->getComponent<TransformComponent>().position.x - 480;
     camera.y = players[0]->getComponent<TransformComponent>().position.y - 320;
 
@@ -193,6 +227,10 @@ void Game::Render() {
 
     for (auto& p : projectiles) {
         p->Draw();
+    }
+
+    for (auto& e : effects) {
+        e->Draw();
     }
 
     SDL_RenderPresent(renderer);

@@ -14,7 +14,7 @@ class AssetManager
 
         //Quản lí game object
         void CreateProjectile(Vector2D pos, Vector2D vel, int range, int speed, std::string id);
-        void CreateEffect(Vector2D pos, Vector2D vel, int range, int speed, std::string id);
+        void CreateEffect(Vector2D pos, Vector2D vel, int range, int speed, std::string id, SDL_RendererFlip flip);
         void CreatePlayer(Vector2D pos, int speed, std::string id);
         void CreateEnemies(Vector2D pos, Vector2D vel, int range, int speed, std::string id);
         //Quản lý texture

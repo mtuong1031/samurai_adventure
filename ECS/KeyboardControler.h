@@ -9,9 +9,11 @@ class KeyboardControler : public Component
     public:
         Uint32 lastTick;
         Vector2D BulletVel;
+        SDL_RendererFlip flip = SDL_FLIP_NONE;
 
         int health = 100;
         bool isDead = false;
+        bool isAttacking = false;
 
         void init() override {
             transform = &entity->getComponent<TransformComponent>();
@@ -62,6 +64,7 @@ class KeyboardControler : public Component
                     transform->velocity.x = -1;
                     sprite->Play("Run");
                     sprite->spriteFlip = SDL_FLIP_HORIZONTAL;
+                    flip = SDL_FLIP_HORIZONTAL;
                     BulletVel = {-1, 0};
                     break;
                 case SDLK_s:
@@ -73,11 +76,14 @@ class KeyboardControler : public Component
                     transform->velocity.x = 1;
                     sprite->Play("Run");
                     sprite->spriteFlip = SDL_FLIP_NONE;
+                    flip = SDL_FLIP_NONE;
                     BulletVel = {1, 0};
                     break;
                 case SDLK_j:
                     transform->velocity.x = 0;
+                    transform->velocity.y = 0;
                     sprite->Play("Attack_x");
+                    isAttacking = true;
                     break;
                 case SDLK_LSHIFT:
                     sprite->Play("Rool");
@@ -99,6 +105,7 @@ class KeyboardControler : public Component
                     transform->velocity.x = 0;
                     sprite->Play("Idle");  
                     sprite->spriteFlip = SDL_FLIP_HORIZONTAL; 
+                    flip = SDL_FLIP_HORIZONTAL;
                     break;
                 case SDLK_s:
                     transform->velocity.y = 0;
@@ -108,9 +115,11 @@ class KeyboardControler : public Component
                     transform->velocity.x = 0;
                     sprite->Play("Idle");
                     sprite->spriteFlip = SDL_FLIP_NONE;
+                    flip = SDL_FLIP_NONE;
                     break;
                 case SDLK_j:
                     sprite->Play("Idle");
+                    isAttacking = false;
                     break;
                 case SDLK_LSHIFT:
                     sprite->Play("Idle");
@@ -131,7 +140,6 @@ class KeyboardControler : public Component
         int height;
         int width;
         bool isAnimating = false;
-        bool isAttacking = false;
         bool isShooting = false;
 
 };

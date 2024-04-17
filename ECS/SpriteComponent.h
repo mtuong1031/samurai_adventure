@@ -44,9 +44,9 @@ class SpriteComponent : public Component {
             Animation run = Animation(1, 4, 100, 19, 19);
             Animation run_up = Animation(2, 4, 100, 19, 19);
             Animation rool = Animation(3, 4, 100, 19, 19);
-            Animation attack_x = Animation(4, 4, 100, 30, 30);
-            Animation attack_up = Animation(5, 4, 100, 30, 30);
-            Animation attack_dow = Animation(6, 4, 100, 30, 30);
+            Animation attack_x = Animation(4, 4, 100, 19, 19);
+            Animation attack_up = Animation(5, 4, 100, 19, 19);
+            Animation attack_dow = Animation(6, 4, 100, 19, 19);
 
             animations.emplace("Idle", idle);
             animations.emplace("Run", run);
@@ -56,7 +56,7 @@ class SpriteComponent : public Component {
             animations.emplace("Attack_up", attack_up);
             animations.emplace("Attack_dow", attack_dow);
 
-            Play("Idle");          
+            Play("Idle"); 
 
             setTex(id);
         }
@@ -69,6 +69,27 @@ class SpriteComponent : public Component {
             Animation idle = Animation(0, numFrames, speed, width, height);
             Animation run = Animation(1, numFrames, speed, width, height);
             Animation attack = Animation(2, numFrames, 100, rattck_width, attack_height);
+            Animation hit = Animation(3, numFrames, 500, width, height);
+
+            animations.emplace("Idle", idle);   
+            animations.emplace("Run", run);
+            animations.emplace("Attack", attack);
+            animations.emplace("Hit", hit);
+
+            Play("Idle");
+
+            setTex(id);
+        }
+
+        SpriteComponent(std::string id, bool isAnimated, int numFrames, int speed, 
+                        int width, int height, SDL_RendererFlip flip) 
+        {
+            animated = isAnimated;
+            spriteFlip = flip;
+
+            Animation idle = Animation(0, numFrames, speed, width, height);
+            Animation run = Animation(1, numFrames, speed, width, height);
+            Animation attack = Animation(2, numFrames, 100, width, height);
             Animation hit = Animation(3, numFrames, 500, width, height);
 
             animations.emplace("Idle", idle);   

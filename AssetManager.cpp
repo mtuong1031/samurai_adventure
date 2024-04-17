@@ -17,30 +17,29 @@ void AssetManager::CreateProjectile(Vector2D pos, Vector2D vel, int range, int s
     projectile.addGroup(Game::groupProjectiles);
 }
 
-void AssetManager::CreateEffect(Vector2D pos, Vector2D vel, int range, int speed, std::string id) {
+void AssetManager::CreateEffect(Vector2D pos, Vector2D vel, int range, int speed, std::string id, SDL_RendererFlip flip) {
     auto& effect(manager->addEntity());
 
-    effect.addComponent<TransformComponent>(pos.x, pos.y, 64, 64, 1);
-    effect.addComponent<SpriteComponent>(id, true, 8, 200, 375, 150, 16 , 16);
+    effect.addComponent<TransformComponent>(pos.x, pos.y, 30, 18, 4);
+    effect.addComponent<SpriteComponent>(id, true, 4, 100, 18, 30, flip);
     effect.addComponent<ProjectileComponent>(range, speed, vel);
     effect.addComponent<ColliderComponent>("effect");
     effect.addGroup(Game::groupEffects);
 }
 
+
 void AssetManager::CreatePlayer(Vector2D pos, int speed, std::string id) {
     auto& player(manager->addEntity());
     Vector2D bulletVel(0, 0);
-
     player.addComponent<TransformComponent>(pos.x, pos.y, 19, 19, 4);
     player.addComponent<SpriteComponent>(id, true);
     player.addComponent<KeyboardControler>();
-    player.addComponent<ColliderComponent>("player");
+    player.addComponent<ColliderComponent>("player", pos.x, pos.y, 78);
 
     // bulletVel.x = player.getComponent<KeyboardControler>().BulletVel.x;
     // bulletVel.y = player.getComponent<KeyboardControler>().BulletVel.y;
     bulletVel = player.getComponent<KeyboardControler>().BulletVel;
     AssetManager::CreateProjectile(pos, bulletVel, 200, 2, "hp");
-    
 
     player.addGroup(Game::groupPlayers);
 }
