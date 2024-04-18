@@ -42,6 +42,8 @@ class Game
             groupProjectiles,
             groupEnemies,
             groupEffects,
+            groupSkills,
+            groupBosses,
         };
 
     private:

@@ -1,5 +1,7 @@
-#include "CommonFunc.h"
 #include "Game.h"
+
+const int SCREEN_WIDTH = 960;
+const int SCREEN_HEIGHT = 672;
 
 Game *game = nullptr;
 

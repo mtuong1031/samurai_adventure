@@ -2,23 +2,35 @@
 #ifndef MAP_H_
 #define MAP_H_
 
-#include "Game.h"
-#include "TextureManager.h"
-#include <fstream>
 #include <string>
 
 class Map {
     public:
-        Map(const char* mfp, int ms, int ts);
+        Map(std::string tID, int ms, int ts);
         ~Map();
+        
         void LoadMap(std::string path, int sizeX, int sizeY);
         void AddTile(int srcX, int srcY, int xpos, int ypos);
 
+        int getScaledSize() {
+            return scaledSize;
+        }
+
+        int getSizeX() {
+            return sizeX;
+        }
+
+        int getSizeY() {
+            return sizeY;
+        }
+
     private:
-        const char* mapFilePath;
+        std::string texID;
         int mapScale;
         int tileSize;
         int scaledSize;
+        int sizeX;
+        int sizeY;
 };  
 
 #endif

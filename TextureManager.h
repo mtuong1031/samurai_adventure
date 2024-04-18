@@ -1,7 +1,5 @@
-#ifndef TEXTUREMANAGER_H
-#define TEXTUREMANAGER_H
+#pragma once
 
-#include "CommonFunc.h"
 #include "Game.h"
 
 class TextureManager {
@@ -16,4 +14,3 @@ class TextureManager {
 };
 
 
-#endif // TEXTURE_MANAGER_H

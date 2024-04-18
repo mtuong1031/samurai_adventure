@@ -52,9 +52,11 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
     assets->AddTexture("background", "image/ParallaxBackground.png");
     assets->AddTexture("player", "image/tuong.png");
     assets->AddTexture("arrow", "image/arrow.png");
-    assets->AddTexture("hp", "image/hp.png");
+    assets->AddTexture("hp", "image/fire.png");
     assets->AddTexture("enemy", "image/enemy1_ani.png");
     assets->AddTexture("effect", "image/skill.png");
+    assets->AddTexture("boss", "image/boss_anie.png");
+    assets->AddTexture("skill", "image/boss_effect.png");
 
     // map = new Map("terrain", 1, 32);
     // map->LoadMap("assets/map.map", 30, 20);
@@ -63,12 +65,7 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
 
     // thực hiện khởi tạo các thành phần của player
     assets->CreatePlayer(Vector2D(300, 300), 200, "player");
- 
-    assets->CreateProjectile(Vector2D(300, 100), Vector2D(0, 0), 200, 2, "hp");
-    assets->CreateProjectile(Vector2D(100, 300), Vector2D(0, 0), 200, 2, "hp");
-    // thực hiện khởi tạo các thành phần của enemy
-    assets->CreateEnemies(Vector2D(600, 100), Vector2D(0,0), 200, 1, "enemy");
-    assets->CreateEnemies(Vector2D(300, 100), Vector2D(0,0), 200, 1, "enemy");
+    assets->CreateBoss(Vector2D(1200, 200), Vector2D(0, 0), 500, 1, "boss", SDL_Rect{0, 0, 125, 110});
 }
 
 auto& tiles(manager.getGroup(Game::groupMap));
@@ -77,6 +74,8 @@ auto& colliders(manager.getGroup(Game::groupColliders));
 auto& projectiles(manager.getGroup(Game::groupProjectiles));
 auto& enemies(manager.getGroup(Game::groupEnemies));
 auto& effects(manager.getGroup(Game::groupEffects));
+auto& skills(manager.getGroup(Game::groupSkills));
+auto& bosses(manager.getGroup(Game::groupBosses));
 
 void Game::HandleEvents() 
 {
@@ -93,6 +92,8 @@ void Game::HandleEvents()
 
 void Game::Update() 
 {
+    SDL_RendererFlip flip = SDL_FLIP_NONE;
+
     SDL_Rect playerCol = players[0]->getComponent<ColliderComponent>().collider;
     Vector2D playerPos = players[0]->getComponent<TransformComponent>().position;
     ColliderComponent playerCollider = players[0]->getComponent<ColliderComponent>();
@@ -121,8 +122,13 @@ void Game::Update()
         // ePos.y -= 60 - 32;
         Vector2D pVel = e->getComponent<TheEnemies>().getDirection(playerPos);
         bool isAttack = e->getComponent<TheEnemies>().isAttacking;
-        if (SDL_GetTicks() - e->getComponent<TheEnemies>().lastick >= 4000 && isAttack)
+        flip = e->getComponent<SpriteComponent>().spriteFlip;
+        if (SDL_GetTicks() - e->getComponent<TheEnemies>().lastick >= 5000 && isAttack)
         {
+            if (flip == SDL_FLIP_HORIZONTAL) 
+                ePos = ePos - Vector2D(64,0);
+            else 
+                ePos = ePos + Vector2D(64,0);
             isAttack = true;
             e->getComponent<TheEnemies>().lastick = SDL_GetTicks();
         } else {
@@ -134,11 +140,54 @@ void Game::Update()
         for (auto ef : effects) {
             if (Collision::AAABB(eCol, ef->getComponent<ColliderComponent>().collider))
             {
-                e->getComponent<TheEnemies>().health -= 1;
+                e->getComponent<TheEnemies>().health -= 10;
                 e->getComponent<TheEnemies>().hit = true;
                 std::cout << "Enemy health: " << e->getComponent<TheEnemies>().health << std::endl;
             }
+
+            if (e->getComponent<TheEnemies>().hit) {
+                e->getComponent<TransformComponent>().position = ePos - eVel*500;
+            }
         } 
+    }
+
+    // XỬ LÍ LỚP BOSS
+    for (auto& boss : bosses) {
+        SDL_Rect bossCol = boss->getComponent<ColliderComponent>().collider;
+        Vector2D bossPos = boss->getComponent<TransformComponent>().position;
+        Vector2D bossVel = boss->getComponent<TransformComponent>().velocity;
+        flip = boss->getComponent<SpriteComponent>().spriteFlip;
+
+        Vector2D pVel = boss->getComponent<TheEnemies>().getDirection(playerPos);
+        bool isAttack = boss->getComponent<TheEnemies>().isAttacking;
+        if (SDL_GetTicks() - boss->getComponent<TheEnemies>().lastick >= 1000 && isAttack)
+        {
+            if (flip == SDL_FLIP_HORIZONTAL) 
+                bossPos = bossPos - Vector2D(125,0);
+            else 
+                bossPos = bossPos + Vector2D(125,0);
+            isAttack = true;
+            assets->CreateSkill(bossPos, Vector2D(0,0), 200, 1, "skill", SDL_FLIP_NONE, SDL_Rect{0, 0, 125, 110});
+            boss->getComponent<TheEnemies>().lastick = SDL_GetTicks();
+        } else {
+            isAttack = false;
+            for (auto& s : skills) {
+                s->destroy();
+            }
+        }
+        for (auto ef : effects) {
+            if (Collision::AAABB(bossCol, ef->getComponent<ColliderComponent>().collider))
+            {
+                boss->getComponent<TheEnemies>().health -= 10;
+                boss->getComponent<TheEnemies>().hit = true;
+                // players[0]->getComponent<TransformComponent>().velocity.x = 2*players[0]->getComponent<TransformComponent>().velocity.x;
+                // players[0]->getComponent<TransformComponent>().velocity.y = 2*players[0]->getComponent<TransformComponent>().velocity.y;
+                // players[0]->getComponent<TransformComponent>().position = playerPos;
+            }
+            if (boss->getComponent<TheEnemies>().hit) {
+                boss->getComponent<TransformComponent>().position = bossPos - bossVel*500;
+            }
+        }
     }
 
     // Xử lí lớp đạn
@@ -146,14 +195,20 @@ void Game::Update()
         if (Collision::AAABB(playerCol, p->getComponent<ColliderComponent>().collider))
         {
             players[0]->getComponent<KeyboardControler>().health -= 5;
+            players[0]->getComponent<KeyboardControler>().hit = true;
+            players[0]->getComponent<TransformComponent>().velocity.x = - players[0]->getComponent<TransformComponent>().velocity.x;
+            players[0]->getComponent<TransformComponent>().velocity.y = - players[0]->getComponent<TransformComponent>().velocity.y;
+            players[0]->getComponent<TransformComponent>().position = playerPos;
             std::cout << "Player health: " << players[0]->getComponent<KeyboardControler>().health << std::endl;
             p->destroy();
+        } else {
+            players[0]->getComponent<KeyboardControler>().hit = false;
         }
     }
 
 
     // Xử lý kĩ năng của nhân vật
-    SDL_RendererFlip flip = players[0]->getComponent<SpriteComponent>().spriteFlip;
+    flip = players[0]->getComponent<SpriteComponent>().spriteFlip;
     bool isSkill = players[0]->getComponent<KeyboardControler>().isAttacking;
     Vector2D skillRect;
     if (SDL_GetTicks() - players[0]->getComponent<KeyboardControler>().lastTick >= 25 && isSkill)
@@ -163,10 +218,19 @@ void Game::Update()
         else 
             skillRect = playerPos + Vector2D(57,0);
 
-        assets->CreateEffect(playerPos, Vector2D(0, 0), 200, 2, "effect", flip);
+        if (players[0]->getComponent<KeyboardControler>().attack_up) {
+            assets->CreateEffect(playerPos, Vector2D(0, 0), 200, 1, "effect", SDL_FLIP_NONE, SDL_Rect{0, 0, 35, 18}, 2);
+        } else if (players[0]->getComponent<KeyboardControler>().attack_down) {
+            assets->CreateEffect(playerPos, Vector2D(0, 0), 200, 1, "effect", SDL_FLIP_NONE, SDL_Rect{0, 0, 35, 18}, 3);
+        } else {
+            assets->CreateEffect(playerPos, Vector2D(0, 0), 200, 1, "effect", flip, SDL_Rect{0, 0, 18, 30}, 1);
+        }
+
         players[0]->getComponent<KeyboardControler>().lastTick = SDL_GetTicks();
     } else {
         isSkill = false;
+        players[0]->getComponent<KeyboardControler>().attack_up = false;
+        players[0]->getComponent<KeyboardControler>().attack_down = false;
         for (auto& ef : effects) {
             ef->destroy();
         }
@@ -232,6 +296,14 @@ void Game::Render() {
 
     for (auto& e : effects) {
         e->Draw();
+    }
+
+    for (auto& s : skills) {
+        s->Draw();
+    }
+
+    for (auto& b : bosses) {
+        b->Draw();
     }
 
     SDL_RenderPresent(renderer);

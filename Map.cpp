@@ -1,10 +1,13 @@
+#include <fstream>
 #include "Map.h"
+#include "Game.h"
 #include "ECS/ECS.h"
 #include "ECS/Component.h"
 
 extern Manager manager;
 
-Map::Map(const char* mfp, int ms, int ts) : mapFilePath(mfp), mapScale(ms), tileSize(ts)
+
+Map::Map(std::string tID, int ms, int ts) : texID(tID), mapScale(ms), tileSize(ts)
 {
     scaledSize = ms * ts;
 }
@@ -15,8 +18,7 @@ Map::~Map()
 void Map::LoadMap(std::string path, int sizeX, int sizeY) 
 {
     char tile;
-    std::fstream mapFile;
-    mapFile.open(path);
+    std::fstream mapFile(path);
 
     int srcX, srcY;
 
@@ -56,12 +58,28 @@ void Map::LoadMap(std::string path, int sizeX, int sizeY)
         }
     }
 
+    mapFile.ignore();
+
+    for (int y = 0; y < sizeY; y++) 
+    {
+        for (int x = 0; x < sizeX; x++)
+        {
+            mapFile.get(tile);
+            if (tile == '2') 
+            {
+                Game::assets->CreateEnemies(Vector2D(x * scaledSize, y * scaledSize), Vector2D(0, 0), 500, 1, "enemy");
+                std::cout << "Create enemy at " << x << " " << y << std::endl;
+            }
+            mapFile.ignore();
+        }
+    }
+
     mapFile.close();
 }
 
 void Map::AddTile(int srcX, int srcY, int xpos, int ypos) 
 {
     auto &tile(manager.addEntity());
-    tile.addComponent<TileComponent>(srcX, srcY, xpos, ypos, tileSize, mapScale, mapFilePath);
+    tile.addComponent<TileComponent>(srcX, srcY, xpos, ypos, tileSize, mapScale, texID);
     tile.addGroup(Game::groupMap);
 }

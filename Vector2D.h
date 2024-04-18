@@ -1,7 +1,8 @@
-#ifndef _Vector2D_h_
-#define _Vector2D_h_
+#pragma once
 
 #include <iostream>
+#include <vector>
+#include <math.h>
 
 // quản lí các phép toán trên vector 2 chiều
 class Vector2D
@@ -36,4 +37,3 @@ class Vector2D
 
 };
 
-#endif // _Vector2D_h_

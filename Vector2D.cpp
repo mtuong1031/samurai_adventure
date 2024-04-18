@@ -104,3 +104,14 @@ std::ostream& operator<<(std::ostream& stream, const Vector2D& vec)
     stream << "(" << vec.x << ", " << vec.y << ")";
     return stream;
 }
+
+// Vector2D& Vector2D::Normalize() 
+// {
+//     float length = sqrt(this->x * this->x + this->y * this->y);
+//     this->x /= length;
+//     this->y /= length;
+
+//     return *this;
+// }
+
+

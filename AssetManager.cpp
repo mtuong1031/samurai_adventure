@@ -10,19 +10,19 @@ AssetManager::~AssetManager() {    }
 void AssetManager::CreateProjectile(Vector2D pos, Vector2D vel, int range, int speed, std::string id) {
     auto& projectile(manager->addEntity());
 
-    projectile.addComponent<TransformComponent>(pos.x, pos.y, 64, 64, 1);
-    projectile.addComponent<SpriteComponent>(id, true, 5, 200, 32, 7, 16 , 16);
+    projectile.addComponent<TransformComponent>(pos.x, pos.y, 10, 10, 2);
+    projectile.addComponent<SpriteComponent>(id, true, 2, 200, 10, 10, 10 , 10);
     projectile.addComponent<ProjectileComponent>(range, speed, vel, id);
-    projectile.addComponent<ColliderComponent>("projectile", pos.x, pos.y, 32, 7);
+    projectile.addComponent<ColliderComponent>("projectile", pos.x, pos.y, 10, 10);
     projectile.addGroup(Game::groupProjectiles);
 }
 
-void AssetManager::CreateEffect(Vector2D pos, Vector2D vel, int range, int speed, std::string id, SDL_RendererFlip flip, SDL_Rect size) {
+void AssetManager::CreateEffect(Vector2D pos, Vector2D vel, int range, int speed, std::string id, SDL_RendererFlip flip, SDL_Rect size, int index) {
     auto& effect(manager->addEntity());
 
     effect.addComponent<TransformComponent>(pos.x, pos.y, size.h, size.w, 3);
     effect.addComponent<SpriteComponent>(id, true, 4, 100, size.w, size.h, flip);
-    effect.addComponent<ProjectileComponent>(range, speed, vel, id);
+    effect.addComponent<ProjectileComponent>(range, speed, vel, id, index);
     effect.addComponent<ColliderComponent>("effect");
     effect.addGroup(Game::groupEffects);
 }
@@ -30,7 +30,7 @@ void AssetManager::CreateEffect(Vector2D pos, Vector2D vel, int range, int speed
 void AssetManager::CreateSkill(Vector2D pos, Vector2D vel, int range, int speed, std::string id, SDL_RendererFlip flip, SDL_Rect size) {
     auto& skill(manager->addEntity());
 
-    skill.addComponent<TransformComponent>(pos.x, pos.y, size.h, size.w, 1);
+    skill.addComponent<TransformComponent>(pos.x, pos.y, size.h, size.w, 2);
     skill.addComponent<SpriteComponent>(id, true, 4, 100, size.w, size.h, flip);
     skill.addComponent<ProjectileComponent>(range, speed, vel, id);
     skill.addComponent<ColliderComponent>("skill", pos.x, pos.y, size.w, size.h);
@@ -69,7 +69,7 @@ void AssetManager::CreateBoss(Vector2D pos, Vector2D vel, int range, int speed, 
 
     boss.addComponent<TransformComponent>(pos.x, pos.y, size.h, size.w, 2);
     boss.addComponent<SpriteComponent>(id, true, 8, 200, size.w, size.h, size.w, size.h);
-    boss.addComponent<TheEnemies>(pos, range, speed, vel);
+    boss.addComponent<TheEnemies>(pos, range, speed, vel, 1000);
     boss.addComponent<ColliderComponent>("boss");
     boss.addGroup(Game::groupBosses);
 

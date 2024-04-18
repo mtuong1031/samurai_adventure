@@ -1,5 +1,4 @@
-#ifndef _Collision_h_
-#define _Collision_h_
+#pragma once
 
 #include "SDL2/SDL.h"
 
@@ -11,5 +10,3 @@ class Collision
         static bool AAABB(const SDL_Rect& rect1, const SDL_Rect& rect2);
         static bool AAABB(const ColliderComponent& colA, const ColliderComponent& colB);
 };
-
-#endif // _Collision_h_
