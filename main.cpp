@@ -16,8 +16,9 @@ int main (int argc, char *argv[]) {\
     game = new Game();
 
     game->Init("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, false);
+    game->Menu();
 
-    while (game->Running()) 
+    while (game->Running())
     {
 
         frameStart = SDL_GetTicks();

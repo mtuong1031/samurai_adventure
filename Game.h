@@ -5,6 +5,7 @@
 
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
+#include "SDL2/SDL_mixer.h"
 
 static const int WINDOW_WIDTH = 960;
 static const int WINDOW_HEIGHT = 720;
@@ -20,6 +21,7 @@ class Game
         ~Game();
 
         void Init (const char* title, int xpos, int ypos, int width, int height, bool fullscreen);
+        bool Menu();
         void HandleEvents();
         void Update();
         void Render();
@@ -33,6 +35,8 @@ class Game
         static SDL_Rect camera;
         static SDL_Rect playerRect;
         static AssetManager* assets;
+        static Mix_Chunk* hitSound;
+        static Mix_Chunk* attackSound;
         // tạo nhóm cho các thành phần
         enum groupLabels : std::size_t
         {
@@ -44,6 +48,7 @@ class Game
             groupEffects,
             groupSkills,
             groupBosses,
+            groupSkillsOfPlayer,
         };
 
     private:

@@ -10,6 +10,7 @@ class ProjectileComponent : public Component {
     public:
         Vector2D pos;
         std::string id;
+        int index = 0;
         Uint32 lastTime = 0;
 
         ProjectileComponent(int rng, int spd, Vector2D vel, std::string id)
@@ -18,6 +19,15 @@ class ProjectileComponent : public Component {
             speed = spd;
             velocity = vel;
             this->id = id;
+        }
+
+        ProjectileComponent(int rng, int spd, Vector2D vel, std::string id, int index)
+        {
+            range = rng;
+            speed = spd;
+            velocity = vel;
+            this->id = id;
+            this->index = index;
         }
 
         ProjectileComponent(Vector2D vel)
@@ -42,7 +52,27 @@ class ProjectileComponent : public Component {
                 transform->velocity.y = velocity.y * 0.5;
             } 
             if (id == "effect") {
+                if (index == 1) {
+                    sprite->Play("Hit");
+                } else {
+                    sprite->Play("Hit");
+                }
+                
+            }
+            if (id == "skill") {
+                if (index == 1) {
+                    sprite->Play("Idle");
+                }
+                if (index == 2) {
+                    sprite->Play("Hit");
+                }
+            }
+            if (id == "skill_of_player") {
                 sprite->Play("Idle");
+                distance += speed;
+                if (distance > range) {
+                    entity->destroy();
+                }
             }
         }
     private:

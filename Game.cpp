@@ -19,6 +19,8 @@ SDL_Rect Game::playerRect = {0, 0, 64, 80};  // x y w h
 SDL_Rect background = {0, 0, 1297, 540};
 
 AssetManager* Game::assets = new AssetManager(&manager);
+Mix_Chunk* Game::hitSound;
+Mix_Chunk* Game::attackSound;
 
 bool Game::isRunning = false;
 
@@ -43,10 +45,18 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
             std::cout << "Renderer created!" << std::endl;
             SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         }
+
+        if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+            std::cout << "Error: " << Mix_GetError() << std::endl;
+        }
+
         isRunning = true;
     } else {
         isRunning = false;
     }
+
+    hitSound = Mix_LoadWAV("sound/hit.wav");
+    attackSound = Mix_LoadWAV("sound/attack.wav");
 
     assets->AddTexture("terrain", "assets/tileset.png");
     assets->AddTexture("background", "image/ParallaxBackground.png");
@@ -57,6 +67,7 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
     assets->AddTexture("effect", "image/skill.png");
     assets->AddTexture("boss", "image/boss_anie.png");
     assets->AddTexture("skill", "image/boss_effect.png");
+    assets->AddTexture("skill_of_player", "image/skill_of_player.png");
 
     // map = new Map("terrain", 1, 32);
     // map->LoadMap("assets/map.map", 30, 20);
@@ -76,6 +87,7 @@ auto& enemies(manager.getGroup(Game::groupEnemies));
 auto& effects(manager.getGroup(Game::groupEffects));
 auto& skills(manager.getGroup(Game::groupSkills));
 auto& bosses(manager.getGroup(Game::groupBosses));
+auto& skillsOfPlayer(manager.getGroup(Game::groupSkillsOfPlayer));
 
 void Game::HandleEvents() 
 {
@@ -88,6 +100,51 @@ void Game::HandleEvents()
     default:
         break;
     }
+}
+
+bool Game::Menu() 
+{
+    assets->AddTexture("menu", "image/menu.png");
+    SDL_Rect srcRect, destRect;
+    srcRect.x = srcRect.y = 0;
+    srcRect.w = 960;
+    srcRect.h = 672;
+    destRect.x = destRect.y = 0;
+    destRect.w = 960;
+    destRect.h = 672;
+
+    TextureManager::Draw(assets->GetTexture("menu"), srcRect, destRect, SDL_FLIP_NONE);
+    
+    bool ret = false;
+    bool isRuning = true;
+    SDL_Event e;
+    int x = 0, y = 0;
+    
+    while (isRuning)
+    {
+        while(SDL_PollEvent(&e)) 
+        {
+            if (e.type == SDL_QUIT) 
+            {
+                isRuning = false;
+            } else if (e.type == SDL_MOUSEBUTTONDOWN) 
+            {
+                SDL_GetMouseState(&x, &y);
+                if (x >= 0 && x <= 960 && y >= 0 && y <= 672) 
+                {
+                    isRuning = false;
+                    ret = true;
+                }
+            } else if (e.type == SDL_KEYDOWN) 
+            {
+                isRuning = false;
+                ret = true;
+                SDL_DestroyTexture(assets->GetTexture("menu")); 
+            }
+        } 
+        SDL_RenderPresent(renderer);
+    }
+    return ret;
 }
 
 void Game::Update() 
@@ -167,25 +224,20 @@ void Game::Update()
             else 
                 bossPos = bossPos + Vector2D(125,0);
             isAttack = true;
-            assets->CreateSkill(bossPos, Vector2D(0,0), 200, 1, "skill", SDL_FLIP_NONE, SDL_Rect{0, 0, 125, 110});
+            assets->CreateSkill(bossPos, pVel, 200, 1, "skill", SDL_FLIP_NONE, SDL_Rect{0, 0, 125, 110});
             boss->getComponent<TheEnemies>().lastick = SDL_GetTicks();
         } else {
             isAttack = false;
-            for (auto& s : skills) {
-                s->destroy();
-            }
         }
         for (auto ef : effects) {
             if (Collision::AAABB(bossCol, ef->getComponent<ColliderComponent>().collider))
             {
                 boss->getComponent<TheEnemies>().health -= 10;
                 boss->getComponent<TheEnemies>().hit = true;
+                Mix_PlayChannel(-1, hitSound, 0);
                 // players[0]->getComponent<TransformComponent>().velocity.x = 2*players[0]->getComponent<TransformComponent>().velocity.x;
                 // players[0]->getComponent<TransformComponent>().velocity.y = 2*players[0]->getComponent<TransformComponent>().velocity.y;
                 // players[0]->getComponent<TransformComponent>().position = playerPos;
-            }
-            if (boss->getComponent<TheEnemies>().hit) {
-                boss->getComponent<TransformComponent>().position = bossPos - bossVel*500;
             }
         }
     }
@@ -209,32 +261,39 @@ void Game::Update()
 
     // Xử lý kĩ năng của nhân vật
     flip = players[0]->getComponent<SpriteComponent>().spriteFlip;
-    bool isSkill = players[0]->getComponent<KeyboardControler>().isAttacking;
+    bool isAttack = players[0]->getComponent<KeyboardControler>().isAttacking;
+    bool isSkillofPlayer = players[0]->getComponent<KeyboardControler>().isSkill;
     Vector2D skillRect;
-    if (SDL_GetTicks() - players[0]->getComponent<KeyboardControler>().lastTick >= 25 && isSkill)
+    if (SDL_GetTicks() - players[0]->getComponent<KeyboardControler>().lastTick >= 25 && isAttack)
     {
         if (flip == SDL_FLIP_HORIZONTAL) 
             skillRect = playerPos - Vector2D(57,0);
         else 
             skillRect = playerPos + Vector2D(57,0);
 
-        if (players[0]->getComponent<KeyboardControler>().attack_up) {
-            assets->CreateEffect(playerPos, Vector2D(0, 0), 200, 1, "effect", SDL_FLIP_NONE, SDL_Rect{0, 0, 35, 18}, 2);
-        } else if (players[0]->getComponent<KeyboardControler>().attack_down) {
-            assets->CreateEffect(playerPos, Vector2D(0, 0), 200, 1, "effect", SDL_FLIP_NONE, SDL_Rect{0, 0, 35, 18}, 3);
-        } else {
-            assets->CreateEffect(playerPos, Vector2D(0, 0), 200, 1, "effect", flip, SDL_Rect{0, 0, 18, 30}, 1);
-        }
-
+        assets->CreateEffect(playerPos, Vector2D(0, 0), 200, 1, "effect", flip, SDL_Rect{0, 0, 18, 30}, 1);
+        Mix_PlayChannel(-1, attackSound, 0);
         players[0]->getComponent<KeyboardControler>().lastTick = SDL_GetTicks();
     } else {
-        isSkill = false;
+        isAttack = false;
         players[0]->getComponent<KeyboardControler>().attack_up = false;
         players[0]->getComponent<KeyboardControler>().attack_down = false;
         for (auto& ef : effects) {
             ef->destroy();
         }
     }
+
+    // if (SDL_GetTicks() - players[0]->getComponent<KeyboardControler>().lastTick >= 5000 && isSkillofPlayer)
+    // {
+    if (isSkillofPlayer) {
+        if (flip == SDL_FLIP_HORIZONTAL) 
+            skillRect = playerPos - Vector2D(57,0);
+        else 
+            skillRect = playerPos + Vector2D(57,0);
+
+        assets->CreateEffect(playerPos, Vector2D(0, 0), 200, 1, "effect", flip, SDL_Rect{0, 0, 18, 30}, 3);
+    }
+
 
     // ss
     if (players[0]->getComponent<KeyboardControler>().health <= 0)
@@ -306,12 +365,21 @@ void Game::Render() {
         b->Draw();
     }
 
+    for (auto& s : skillsOfPlayer) {
+        s->Draw();
+    }
+
     SDL_RenderPresent(renderer);
 }
 
 void Game::Clean() {
+    Mix_FreeChunk(hitSound);
+    Mix_FreeChunk(attackSound);
+    hitSound = nullptr;
+    attackSound = nullptr;
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);
+    Mix_Quit();
     SDL_Quit();
     std::cout << "Game cleaned!" << std::endl;
 }
