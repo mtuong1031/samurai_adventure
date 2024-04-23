@@ -14,13 +14,13 @@ SDL_Event Game::event;
 
 // SDL_Rect Game::camera = {0, 0, map->getScaledSize() * map->getSizeX() - WINDOW_WIDTH, 
 //                                 map->getScaledSize() * map->getSizeY() - WINDOW_HEIGHT};
-SDL_Rect Game::camera = {0, 0, 1200, 0};
+SDL_Rect Game::camera = {0, 0, 1920, 1440};
 SDL_Rect Game::playerRect = {0, 0, 64, 80};  // x y w h
-SDL_Rect background = {0, 0, 1297, 540};
 
 AssetManager* Game::assets = new AssetManager(&manager);
 Mix_Chunk* Game::hitSound;
 Mix_Chunk* Game::attackSound;
+Mix_Chunk* Game::runSound;
 
 bool Game::isRunning = false;
 
@@ -57,9 +57,9 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
 
     hitSound = Mix_LoadWAV("sound/hit.wav");
     attackSound = Mix_LoadWAV("sound/attack.wav");
+    runSound = Mix_LoadWAV("sound/run.wav");
 
     assets->AddTexture("terrain", "assets/tileset.png");
-    assets->AddTexture("background", "image/ParallaxBackground.png");
     assets->AddTexture("player", "image/tuong.png");
     assets->AddTexture("arrow", "image/arrow.png");
     assets->AddTexture("hp", "image/fire.png");
@@ -67,12 +67,11 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
     assets->AddTexture("effect", "image/skill.png");
     assets->AddTexture("boss", "image/boss_anie.png");
     assets->AddTexture("skill", "image/boss_effect.png");
-    assets->AddTexture("skill_of_player", "image/skill_of_player.png");
+    assets->AddTexture("ssss", "image/ssss.png");
+    assets->AddTexture("block", "image/khien.png");
 
-    // map = new Map("terrain", 1, 32);
-    // map->LoadMap("assets/map.map", 30, 20);
     map = new Map("terrain", 1,48); 
-    map->LoadMap("assets/2s.map", 55, 14);
+    map->LoadMap("assets/3s.map", 40, 30);
 
     // thực hiện khởi tạo các thành phần của player
     assets->CreatePlayer(Vector2D(300, 300), 200, "player");
@@ -84,10 +83,12 @@ auto& players(manager.getGroup(Game::groupPlayers));
 auto& colliders(manager.getGroup(Game::groupColliders));
 auto& projectiles(manager.getGroup(Game::groupProjectiles));
 auto& enemies(manager.getGroup(Game::groupEnemies));
+
 auto& effects(manager.getGroup(Game::groupEffects));
 auto& skills(manager.getGroup(Game::groupSkills));
 auto& bosses(manager.getGroup(Game::groupBosses));
-auto& skillsOfPlayer(manager.getGroup(Game::groupSkillsOfPlayer));
+auto& sssses(manager.getGroup(Game::groupSssses));
+auto& blooks(manager.getGroup(Game::groupBlooks));
 
 void Game::HandleEvents() 
 {
@@ -166,6 +167,13 @@ void Game::Update()
             playerPos = playerPos - players[0]->getComponent<TransformComponent>().velocity;
             players[0]->getComponent<TransformComponent>().position = playerPos;
         }
+        for (auto& p : projectiles) {
+            SDL_Rect pCol = p->getComponent<ColliderComponent>().collider;
+            if (Collision::AAABB(pCol, cCol))
+            {
+                p->destroy();
+            }
+        }
     }
 
     // Xử lí các thành phần của Enemy
@@ -175,8 +183,15 @@ void Game::Update()
         Vector2D ePos = e->getComponent<TransformComponent>().position;
         Vector2D eVel = e->getComponent<TransformComponent>().velocity;
 
-        // ePos.x -= 187 - 32;
-        // ePos.y -= 60 - 32;
+        for (auto& c : colliders) {
+            SDL_Rect cCol = c->getComponent<ColliderComponent>().collider;
+            if (Collision::AAABB(eCol, cCol))
+            {
+                ePos = ePos - eVel*10;
+                e->getComponent<TransformComponent>().position = ePos;
+            }
+        }
+
         Vector2D pVel = e->getComponent<TheEnemies>().getDirection(playerPos);
         bool isAttack = e->getComponent<TheEnemies>().isAttacking;
         flip = e->getComponent<SpriteComponent>().spriteFlip;
@@ -203,7 +218,7 @@ void Game::Update()
             }
 
             if (e->getComponent<TheEnemies>().hit) {
-                e->getComponent<TransformComponent>().position = ePos - eVel*500;
+                e->getComponent<TransformComponent>().position = ePos - eVel*50;
             }
         } 
     }
@@ -235,9 +250,6 @@ void Game::Update()
                 boss->getComponent<TheEnemies>().health -= 10;
                 boss->getComponent<TheEnemies>().hit = true;
                 Mix_PlayChannel(-1, hitSound, 0);
-                // players[0]->getComponent<TransformComponent>().velocity.x = 2*players[0]->getComponent<TransformComponent>().velocity.x;
-                // players[0]->getComponent<TransformComponent>().velocity.y = 2*players[0]->getComponent<TransformComponent>().velocity.y;
-                // players[0]->getComponent<TransformComponent>().position = playerPos;
             }
         }
     }
@@ -256,6 +268,12 @@ void Game::Update()
         } else {
             players[0]->getComponent<KeyboardControler>().hit = false;
         }
+        for (auto& ef : effects) {
+            if (Collision::AAABB(p->getComponent<ColliderComponent>().collider, ef->getComponent<ColliderComponent>().collider))
+            {
+                p->destroy();
+            }
+        }
     }
 
 
@@ -263,8 +281,9 @@ void Game::Update()
     flip = players[0]->getComponent<SpriteComponent>().spriteFlip;
     bool isAttack = players[0]->getComponent<KeyboardControler>().isAttacking;
     bool isSkillofPlayer = players[0]->getComponent<KeyboardControler>().isSkill;
+    bool isBlocking = players[0]->getComponent<KeyboardControler>().isBlocking;
     Vector2D skillRect;
-    if (SDL_GetTicks() - players[0]->getComponent<KeyboardControler>().lastTick >= 25 && isAttack)
+    if (SDL_GetTicks() - players[0]->getComponent<KeyboardControler>().attack_cd >= 25 && isAttack)
     {
         if (flip == SDL_FLIP_HORIZONTAL) 
             skillRect = playerPos - Vector2D(57,0);
@@ -273,27 +292,36 @@ void Game::Update()
 
         assets->CreateEffect(playerPos, Vector2D(0, 0), 200, 1, "effect", flip, SDL_Rect{0, 0, 18, 30}, 1);
         Mix_PlayChannel(-1, attackSound, 0);
-        players[0]->getComponent<KeyboardControler>().lastTick = SDL_GetTicks();
+        players[0]->getComponent<KeyboardControler>().attack_cd = SDL_GetTicks();
+    } else if (SDL_GetTicks() - players[0]->getComponent<KeyboardControler>().block_cd >= 25 && isBlocking) {
+        if (flip == SDL_FLIP_HORIZONTAL) 
+            skillRect = playerPos - Vector2D(27,0);
+        else 
+            skillRect = playerPos + Vector2D(27,0);
+
+        assets->CreateEffect(playerPos, Vector2D(0, 0), 200, 1, "block", flip, SDL_Rect{0, 0, 11, 16}, 2);
+        players[0]->getComponent<KeyboardControler>().block_cd = SDL_GetTicks();
     } else {
+        isBlocking = false;
         isAttack = false;
-        players[0]->getComponent<KeyboardControler>().attack_up = false;
-        players[0]->getComponent<KeyboardControler>().attack_down = false;
         for (auto& ef : effects) {
             ef->destroy();
         }
     }
 
-    // if (SDL_GetTicks() - players[0]->getComponent<KeyboardControler>().lastTick >= 5000 && isSkillofPlayer)
-    // {
-    if (isSkillofPlayer) {
-        if (flip == SDL_FLIP_HORIZONTAL) 
-            skillRect = playerPos - Vector2D(57,0);
-        else 
-            skillRect = playerPos + Vector2D(57,0);
+    Vector2D BulletVel = players[0]->getComponent<KeyboardControler>().BulletVel;
+    if (SDL_GetTicks() - players[0]->getComponent<KeyboardControler>().skill_cd >= 200 && isSkillofPlayer)
+    {
+        if (isSkillofPlayer) {
+            if (flip == SDL_FLIP_HORIZONTAL) 
+                skillRect = playerPos - Vector2D(57,0);
+            else 
+                skillRect = playerPos + Vector2D(57,0);
 
-        assets->CreateEffect(playerPos, Vector2D(0, 0), 200, 1, "effect", flip, SDL_Rect{0, 0, 18, 30}, 3);
+            assets->CreateSkillofPlayer(playerPos, BulletVel, 200, 1, "ssss", flip, SDL_Rect{0, 0, 120, 90});
+            players[0]->getComponent<KeyboardControler>().skill_cd = SDL_GetTicks();
+        }
     }
-
 
     // ss
     if (players[0]->getComponent<KeyboardControler>().health <= 0)
@@ -333,8 +361,6 @@ void Game::Update()
 void Game::Render() {
     SDL_RenderClear(renderer);
 
-    TextureManager::Draw(assets->GetTexture("background"), background, background, SDL_FLIP_NONE);
-    // thực hiện vẽ map
     for (auto& t : tiles) {
         t->Draw();
     }
@@ -365,8 +391,8 @@ void Game::Render() {
         b->Draw();
     }
 
-    for (auto& s : skillsOfPlayer) {
-        s->Draw();
+    for (auto& ssss : sssses) {
+        ssss->Draw();
     }
 
     SDL_RenderPresent(renderer);

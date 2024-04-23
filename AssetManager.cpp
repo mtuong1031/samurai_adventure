@@ -20,11 +20,21 @@ void AssetManager::CreateProjectile(Vector2D pos, Vector2D vel, int range, int s
 void AssetManager::CreateEffect(Vector2D pos, Vector2D vel, int range, int speed, std::string id, SDL_RendererFlip flip, SDL_Rect size, int index) {
     auto& effect(manager->addEntity());
 
-    effect.addComponent<TransformComponent>(pos.x, pos.y, size.h, size.w, 3);
+    effect.addComponent<TransformComponent>(pos.x, pos.y, size.h, size.w, 3 * index);
     effect.addComponent<SpriteComponent>(id, true, 4, 100, size.w, size.h, flip);
     effect.addComponent<ProjectileComponent>(range, speed, vel, id, index);
     effect.addComponent<ColliderComponent>("effect");
     effect.addGroup(Game::groupEffects);
+}
+
+void AssetManager::CreateSkillofPlayer(Vector2D pos, Vector2D vel, int range, int speed, std::string id, SDL_RendererFlip flip, SDL_Rect size) {
+    auto& skill(manager->addEntity());
+
+    skill.addComponent<TransformComponent>(pos.x, pos.y, size.h, size.w, 1);
+    skill.addComponent<SpriteComponent>(id, true, 4, 100, size.w, size.h, flip);
+    skill.addComponent<ProjectileComponent>(range, speed, vel, id);
+    skill.addComponent<ColliderComponent>("ssss");
+    skill.addGroup(Game::groupSssses);
 }
 
 void AssetManager::CreateSkill(Vector2D pos, Vector2D vel, int range, int speed, std::string id, SDL_RendererFlip flip, SDL_Rect size) {
