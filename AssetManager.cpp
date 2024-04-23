@@ -85,6 +85,17 @@ void AssetManager::CreateBoss(Vector2D pos, Vector2D vel, int range, int speed, 
 
 }
 
+void AssetManager::CreateItem(Vector2D pos, Vector2D vel, int range, int speed, std::string id, SDL_Rect size) 
+{
+    auto& item(manager->addEntity());
+
+    item.addComponent<TransformComponent>(pos.x, pos.y, size.h, size.w, 1);
+    item.addComponent<SpriteComponent>(id, true, 12, 50, size.w, size.h, SDL_FLIP_NONE);
+    item.addComponent<ProjectileComponent>(range, speed, vel, id);
+    item.addComponent<ColliderComponent>("item");
+    item.addGroup(Game::groupItems);
+}
+
 void AssetManager::AddTexture(std::string id, const char* path) {
     textures.emplace(id, TextureManager::LoadTexture(path));
 }
@@ -92,4 +103,14 @@ void AssetManager::AddTexture(std::string id, const char* path) {
 
 SDL_Texture* AssetManager::GetTexture(std::string id) {
     return textures[id];
+}
+
+void AssetManager::AddFont(std::string id, std::string path, int fontSize) 
+{
+    fonts.emplace(id, TTF_OpenFont(path.c_str(), fontSize));
+}
+
+TTF_Font* AssetManager::GetFont(std::string id) 
+{
+    return fonts[id];
 }
