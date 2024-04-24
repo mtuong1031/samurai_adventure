@@ -23,6 +23,7 @@ class Game
         void Init (const char* title, int xpos, int ypos, int width, int height, bool fullscreen);
         bool Menu();
         void HandleEvents();
+        void CrateHpBar();
         void Update();
         void Render();
         void Clean();
@@ -37,6 +38,7 @@ class Game
         static AssetManager* assets;
         static Mix_Chunk* hitSound;
         static Mix_Chunk* attackSound;
+        static Mix_Chunk* runSound;
         // tạo nhóm cho các thành phần
         enum groupLabels : std::size_t
         {
@@ -48,7 +50,9 @@ class Game
             groupEffects,
             groupSkills,
             groupBosses,
-            groupSkillsOfPlayer,
+            groupSssses,
+            groupBlooks,
+            groupItems,
         };
 
     private:

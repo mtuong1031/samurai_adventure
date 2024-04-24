@@ -19,6 +19,7 @@ public:
 
 		SetLabelText(labelText, labelFont);
 	}
+
 	~UILabel()
 	{}
 

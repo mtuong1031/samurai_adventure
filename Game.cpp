@@ -16,7 +16,7 @@ SDL_Event Game::event;
 
 // SDL_Rect Game::camera = {0, 0, map->getScaledSize() * map->getSizeX() - WINDOW_WIDTH, 
 //                                 map->getScaledSize() * map->getSizeY() - WINDOW_HEIGHT};
-SDL_Rect Game::camera = {0, 0, 1920, 1440};
+SDL_Rect Game::camera = {0, 0, 960, 768};
 SDL_Rect Game::playerRect = {0, 0, 64, 80};  // x y w h
 
 AssetManager* Game::assets = new AssetManager(&manager);
@@ -78,7 +78,9 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
     assets->AddTexture("attack_down", "image/tuong_attack_down.png");
 
     assets->AddTexture("boss", "image/boss_anie.png");
-    assets->AddTexture("skill", "image/boss_effect.png");
+    assets->AddTexture("skill", "image/attack_boss.png");
+    assets->AddTexture("sb1", "image/boss_effect_2.png");
+
     assets->AddTexture("ssss", "image/ssss.png");
     assets->AddTexture("skill2", "image/skill2.png");
     assets->AddTexture("chest", "image/chest.png");
@@ -89,8 +91,9 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
     map->LoadMap("assets/3s.map", 40, 30);
 
     SDL_Color white = {255, 255, 255, 255};
-    label.addComponent<UILabel>(720, 30, "Hello World", "arial", white);
-    label.addComponent<UILabel>(19, 10, "Hello World", "arial", white);
+    SDL_Color red = {255, 0, 0, 255};
+
+    label.addComponent<UILabel>(55, 33, "Player HP: 100", "arial", white);
 
     // thực hiện khởi tạo các thành phần của player
     assets->CreatePlayer(Vector2D(300, 300), 200, "player");
@@ -168,6 +171,50 @@ bool Game::Menu()
     return ret;
 }
 
+void Game::CrateHpBar() 
+{
+    SDL_Rect playerhealth = {0, 0, 150, 36};
+    int lastPLayerHealthWidth = playerhealth.w - 12;
+
+    const int playerMaxHealth = players[0]->getComponent<KeyboardControler>().max_health;
+    int playerCurrentHealth = players[0]->getComponent<KeyboardControler>().health;
+
+    // Player health bar
+    SDL_Rect firstLayer = {44, 24, playerhealth.w, playerhealth.h};
+    SDL_Rect secondLayer = {50, 30, (playerhealth.w - 12) * playerCurrentHealth / playerMaxHealth, playerhealth.h - 12};
+
+    if (lastPLayerHealthWidth > secondLayer.w)
+        lastPLayerHealthWidth--;
+
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderFillRect(renderer, &firstLayer);
+
+    SDL_SetRenderDrawColor(renderer, 122, 0, 0, 255);
+    SDL_RenderFillRect(renderer, &secondLayer);
+
+    if (bosses[0]->getComponent<TheBosses>().inRange) {
+        SDL_Rect bosshealth = {0, 0, 400, 24};
+        int lastBossHealthWidth = bosshealth.w - 12;
+
+        const int bossMaxHealth = bosses[0]->getComponent<TheBosses>().max_health;
+        int bossCurrentHealth = bosses[0]->getComponent<TheBosses>().health;
+
+        // Boss health bar
+        SDL_Rect firstLayer = {270, 90, bosshealth.w, bosshealth.h};
+        SDL_Rect secondLayer = {276, 96, (bosshealth.w - 12) * bossCurrentHealth / bossMaxHealth, bosshealth.h - 12};
+
+        if (lastBossHealthWidth > secondLayer.w)
+            lastBossHealthWidth--;
+
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderFillRect(renderer, &firstLayer);
+
+        SDL_SetRenderDrawColor(renderer, 122, 0, 0, 255);
+        SDL_RenderFillRect(renderer, &secondLayer);
+    }
+
+}
+
 void Game::Update() 
 {
 
@@ -176,6 +223,7 @@ void Game::Update()
     SDL_Rect playerCol = players[0]->getComponent<ColliderComponent>().collider;
     Vector2D playerPos = players[0]->getComponent<TransformComponent>().position;
     ColliderComponent playerCollider = players[0]->getComponent<ColliderComponent>();
+    int dmg = 10;
 
     std::stringstream ss;
     ss << "Player HP: " << players[0]->getComponent<KeyboardControler>().health;
@@ -197,6 +245,13 @@ void Game::Update()
             if (Collision::AAABB(pCol, cCol))
             {
                 p->destroy();
+            }
+        }
+        for (auto& s : skills) {
+            SDL_Rect sCol = s->getComponent<ColliderComponent>().collider;
+            if (Collision::AAABB(sCol, cCol))
+            {
+                s->destroy();
             }
         }
     }
@@ -223,9 +278,9 @@ void Game::Update()
         if (SDL_GetTicks() - e->getComponent<TheEnemies>().lastick >= 5000 && isAttack)
         {
             if (flip == SDL_FLIP_HORIZONTAL) 
-                ePos = ePos - Vector2D(64,0);
+                ePos = ePos + Vector2D(32,0);
             else 
-                ePos = ePos + Vector2D(64,0);
+                ePos = ePos + Vector2D(32,0);
             isAttack = true;
             e->getComponent<TheEnemies>().lastick = SDL_GetTicks();
         } else {
@@ -246,6 +301,18 @@ void Game::Update()
                 e->getComponent<TransformComponent>().position = ePos - eVel*50;
             }
         } 
+
+        for (auto& s : sssses) {
+            if (Collision::AAABB(eCol, s->getComponent<ColliderComponent>().collider))
+            {
+                s->destroy();
+                e->getComponent<TheEnemies>().health -= 10;
+                e->getComponent<TheEnemies>().hit = true;
+            } else {
+                e->getComponent<TheEnemies>().hit = false;
+            }
+        }
+
     }
 
     // XỬ LÍ LỚP BOSS
@@ -255,26 +322,82 @@ void Game::Update()
         Vector2D bossVel = boss->getComponent<TransformComponent>().velocity;
         flip = boss->getComponent<SpriteComponent>().spriteFlip;
 
-        Vector2D pVel = boss->getComponent<TheEnemies>().getDirection(playerPos);
-        bool isAttack = boss->getComponent<TheEnemies>().isAttacking;
-        if (SDL_GetTicks() - boss->getComponent<TheEnemies>().lastick >= 1000 && isAttack)
+        Vector2D pVel = boss->getComponent<TheBosses>().getDirection(playerPos);
+        bool isAttack = boss->getComponent<TheBosses>().isAttacking;
+        if (SDL_GetTicks() - boss->getComponent<TheBosses>().lastick >= 1000 && isAttack)
         {
             if (flip == SDL_FLIP_HORIZONTAL) 
-                bossPos = bossPos - Vector2D(125,0);
+                bossPos = bossPos + Vector2D(125,110);
             else 
-                bossPos = bossPos + Vector2D(125,0);
+                bossPos = bossPos + Vector2D(125,110);
             isAttack = true;
-            assets->CreateSkill(bossPos, pVel, 200, 1, "skill", SDL_FLIP_NONE, SDL_Rect{0, 0, 125, 110});
-            boss->getComponent<TheEnemies>().lastick = SDL_GetTicks();
+            assets->CreateSkill(bossPos, pVel, 200, 1, "skill", SDL_FLIP_NONE, SDL_Rect{0, 0, 32, 10}, 2);
+
+            if (boss->getComponent<TheBosses>().status == 1) {
+                assets->CreateSkill(bossPos, Vector2D(1,1), 200, 1, "skill", SDL_FLIP_NONE, SDL_Rect{0, 0, 32, 10}, 2);
+                assets->CreateSkill(bossPos, Vector2D(-1,1), 200, 1, "skill", SDL_FLIP_NONE, SDL_Rect{0, 0, 32, 10}, 2);
+                assets->CreateSkill(bossPos, Vector2D(1,-1), 200, 1, "skill", SDL_FLIP_NONE, SDL_Rect{0, 0, 32, 10}, 2);
+            }
+
+            if (boss->getComponent<TheBosses>().status == 2) {
+                assets->CreateSkill(bossPos, Vector2D(0,1), 200, 1, "skill", SDL_FLIP_NONE, SDL_Rect{0, 0, 32, 10}, 2);
+                assets->CreateSkill(bossPos, Vector2D(-1,0), 200, 1, "skill", SDL_FLIP_NONE, SDL_Rect{0, 0, 32, 10}, 2);
+                assets->CreateSkill(bossPos, Vector2D(1,0), 200, 1, "skill", SDL_FLIP_NONE, SDL_Rect{0, 0, 32, 10}, 2);
+                assets->CreateSkill(bossPos, Vector2D(0,-1), 200, 1, "skill", SDL_FLIP_NONE, SDL_Rect{0, 0, 32, 10}, 2);
+            }
+            
+            boss->getComponent<TheBosses>().lastick = SDL_GetTicks();
         } else {
             isAttack = false;
         }
+
+        if (boss->getComponent<TheBosses>().status == 1
+            && SDL_GetTicks() - boss->getComponent<TheBosses>().lastick >= 80)
+        {
+            assets->CreateSkill(Vector2D(720,768), Vector2D(0, 1), 200, 1, "sb1", SDL_FLIP_NONE, SDL_Rect{0, 0, 48, 48}, 1);
+            assets->CreateSkill(Vector2D(96,768), Vector2D(0, 1), 200, 1, "sb1", SDL_FLIP_NONE, SDL_Rect{0, 0, 48, 48}, 1);
+        } else {}
+
+        switch (boss->getComponent<TheBosses>().health) {
+            case 750:
+                assets->CreateItem(Vector2D(336, 912), Vector2D(0, 0), 200, 1, "chest", SDL_Rect{0, 0, 48, 48});
+                assets->CreateItem(Vector2D(576, 912), Vector2D(0, 0), 200, 1, "chest", SDL_Rect{0, 0, 48, 48});
+                assets->CreateItem(Vector2D(576, 1200), Vector2D(0, 0), 200, 1, "chest", SDL_Rect{0, 0, 48, 48});
+                assets->CreateItem(Vector2D(336, 1200), Vector2D(0, 0), 200, 1, "chest", SDL_Rect{0, 0, 48, 48});
+                break;
+            case 400:
+                assets->CreateItem(Vector2D(336, 912), Vector2D(0, 0), 200, 1, "chest", SDL_Rect{0, 0, 48, 48});
+                assets->CreateItem(Vector2D(576, 912), Vector2D(0, 0), 200, 1, "chest", SDL_Rect{0, 0, 48, 48});
+                assets->CreateItem(Vector2D(576, 1200), Vector2D(0, 0), 200, 1, "chest", SDL_Rect{0, 0, 48, 48});
+                assets->CreateItem(Vector2D(336, 1200), Vector2D(0, 0), 200, 1, "chest", SDL_Rect{0, 0, 48, 48});
+                break;
+            case 100:
+                assets->CreateItem(Vector2D(336, 912), Vector2D(0, 0), 200, 1, "chest", SDL_Rect{0, 0, 48, 48});
+                assets->CreateItem(Vector2D(576, 912), Vector2D(0, 0), 200, 1, "chest", SDL_Rect{0, 0, 48, 48});
+                assets->CreateItem(Vector2D(576, 1200), Vector2D(0, 0), 200, 1, "chest", SDL_Rect{0, 0, 48, 48});
+                assets->CreateItem(Vector2D(336, 1200), Vector2D(0, 0), 200, 1, "chest", SDL_Rect{0, 0, 48, 48});
+                break;
+            default:
+                break;
+        }
+
+            // Va cham dan
         for (auto ef : effects) {
             if (Collision::AAABB(bossCol, ef->getComponent<ColliderComponent>().collider))
             {
-                boss->getComponent<TheEnemies>().health -= 10;
-                boss->getComponent<TheEnemies>().hit = true;
+                boss->getComponent<TheBosses>().health -= 10;
+                boss->getComponent<TheBosses>().hit = true;
                 Mix_PlayChannel(-1, hitSound, 0);
+            }
+        }
+        for (auto& ss : sssses) {
+            if (Collision::AAABB(bossCol, ss->getComponent<ColliderComponent>().collider))
+            {
+                ss->destroy();
+                boss->getComponent<TheBosses>().health -= 10;
+                boss->getComponent<TheBosses>().hit = true;
+            } else {
+                boss->getComponent<TheBosses>().hit = false;
             }
         }
     }
@@ -301,6 +424,22 @@ void Game::Update()
         }
     }
 
+    for (auto& s: skills) {
+        SDL_Rect sCol = s->getComponent<ColliderComponent>().collider;
+        if (Collision::AAABB(playerCol, sCol))
+        {
+            players[0]->getComponent<KeyboardControler>().health -= 5;
+            players[0]->getComponent<KeyboardControler>().hit = true;
+            players[0]->getComponent<TransformComponent>().velocity.x = - players[0]->getComponent<TransformComponent>().velocity.x;
+            players[0]->getComponent<TransformComponent>().velocity.y = - players[0]->getComponent<TransformComponent>().velocity.y;
+            players[0]->getComponent<TransformComponent>().position = playerPos;
+            std::cout << "Player health: " << players[0]->getComponent<KeyboardControler>().health << std::endl;
+            s->destroy();
+        } else {
+            players[0]->getComponent<KeyboardControler>().hit = false;
+        }
+    }
+
     // Xu ly lop item
     for (auto& i : items) {
         if (Collision::AAABB(playerCol, i->getComponent<ColliderComponent>().collider))
@@ -318,21 +457,11 @@ void Game::Update()
     Vector2D skillRect;
     if (SDL_GetTicks() - players[0]->getComponent<KeyboardControler>().attack_cd >= 25 && isAttack)
     {
-        if (players[0]->getComponent<KeyboardControler>().attack_up) 
-        {
-            skillRect = playerPos - Vector2D(0, 37);
-            assets->CreateEffect(playerPos, Vector2D(0, 0), 200, 1, "attack_up", SDL_FLIP_NONE, SDL_Rect{0, 0, 35, 18}, 1);
-            players[0]->getComponent<KeyboardControler>().attack_cd = SDL_GetTicks();
-        } else if (players[0]->getComponent<KeyboardControler>().attack_down) 
-        {
-            assets->CreateEffect(playerPos, Vector2D(0, 0), 200, 1, "attack_down", SDL_FLIP_NONE, SDL_Rect{0, 0, 35, 18}, 1);
-            players[0]->getComponent<KeyboardControler>().attack_cd = SDL_GetTicks();
-        } else 
         {
             if (flip == SDL_FLIP_HORIZONTAL) 
-                skillRect = playerPos - Vector2D(57,0);
+                skillRect = playerPos - Vector2D(57,17);
             else 
-                skillRect = playerPos + Vector2D(57,0);
+                skillRect = playerPos + Vector2D(57,-17);
 
             assets->CreateEffect(playerPos, Vector2D(0, 0), 200, 1, "effect", flip, SDL_Rect{0, 0, 18, 30}, 1);
             Mix_PlayChannel(-1, attackSound, 0);
@@ -401,14 +530,17 @@ void Game::Render() {
         t->Draw();
     }
 
-    // thực hiện vẽ player
-    for (auto& p : players) {
-        p->Draw();
-    }
-
     for (auto& e : enemies)
     {
         e->Draw();
+    }
+
+    for (auto& b : bosses) {
+        b->Draw();
+    }
+
+    for (auto& p : players) {
+        p->Draw();
     }
 
     for (auto& p : projectiles) {
@@ -423,10 +555,6 @@ void Game::Render() {
         s->Draw();
     }
 
-    for (auto& b : bosses) {
-        b->Draw();
-    }
-
     for (auto& ssss : sssses) {
         ssss->Draw();
     }
@@ -434,6 +562,8 @@ void Game::Render() {
     for (auto& i : items) {
         i->Draw();
     }
+
+    CrateHpBar();
 
     label.Draw();
 
