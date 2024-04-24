@@ -37,11 +37,11 @@ void AssetManager::CreateSkillofPlayer(Vector2D pos, Vector2D vel, int range, in
     skill.addGroup(Game::groupSssses);
 }
 
-void AssetManager::CreateSkill(Vector2D pos, Vector2D vel, int range, int speed, std::string id, SDL_RendererFlip flip, SDL_Rect size) {
+void AssetManager::CreateSkill(Vector2D pos, Vector2D vel, int range, int speed, std::string id, SDL_RendererFlip flip, SDL_Rect size, int index) {
     auto& skill(manager->addEntity());
 
-    skill.addComponent<TransformComponent>(pos.x, pos.y, size.h, size.w, 2);
-    skill.addComponent<SpriteComponent>(id, true, 4, 100, size.w, size.h, flip);
+    skill.addComponent<TransformComponent>(pos.x, pos.y, size.h, size.w, index);
+    skill.addComponent<SpriteComponent>(id, true, 6, 50, size.w, size.h, flip);
     skill.addComponent<ProjectileComponent>(range, speed, vel, id);
     skill.addComponent<ColliderComponent>("skill", pos.x, pos.y, size.w, size.h);
     skill.addGroup(Game::groupSkills);
@@ -79,7 +79,7 @@ void AssetManager::CreateBoss(Vector2D pos, Vector2D vel, int range, int speed, 
 
     boss.addComponent<TransformComponent>(pos.x, pos.y, size.h, size.w, 2);
     boss.addComponent<SpriteComponent>(id, true, 8, 200, size.w, size.h, size.w, size.h);
-    boss.addComponent<TheEnemies>(pos, range, speed, vel, 1000);
+    boss.addComponent<TheBosses>(pos, range, speed, vel, 1000);
     boss.addComponent<ColliderComponent>("boss");
     boss.addGroup(Game::groupBosses);
 
