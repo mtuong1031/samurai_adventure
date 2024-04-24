@@ -36,6 +36,7 @@ class SpriteComponent : public Component {
             setTex(id);
         }
 
+        // player
         SpriteComponent(std::string id, bool isAnimated) 
         {
             animated = isAnimated;
@@ -47,6 +48,8 @@ class SpriteComponent : public Component {
             Animation attack_x = Animation(4, 4, 100, 19, 19);
             Animation attack_up = Animation(5, 4, 100, 19, 19);
             Animation attack_dow = Animation(6, 4, 100, 19, 19);
+            Animation idle_up = Animation(7, 2, 200, 19, 19);
+            Animation hit = Animation(8, 2, 100, 19, 19);
 
             animations.emplace("Idle", idle);
             animations.emplace("Run", run);
@@ -55,12 +58,15 @@ class SpriteComponent : public Component {
             animations.emplace("Attack_x", attack_x);
             animations.emplace("Attack_up", attack_up);
             animations.emplace("Attack_dow", attack_dow);
+            animations.emplace("Idle_up", idle_up);
+            animations.emplace("Hit", hit);
 
             Play("Idle"); 
 
             setTex(id);
         }
 
+        // enemy
         SpriteComponent(std::string id, bool isAnimated, int numFrames, int speed, 
                         int width, int height, int rattck_width, int attack_height) 
         {
@@ -68,36 +74,93 @@ class SpriteComponent : public Component {
 
             Animation idle = Animation(0, numFrames, speed, width, height);
             Animation run = Animation(1, numFrames, speed, width, height);
-            Animation attack = Animation(2, numFrames, 100, rattck_width, attack_height);
+            Animation attack = Animation(2, numFrames, 200, rattck_width, attack_height);
             Animation hit = Animation(3, numFrames, 500, width, height);
+            Animation skill = Animation(4, numFrames, 100, rattck_width, attack_height);
 
             animations.emplace("Idle", idle);   
             animations.emplace("Run", run);
             animations.emplace("Attack", attack);
             animations.emplace("Hit", hit);
+            animations.emplace("Skill", skill);
 
             Play("Idle");
 
             setTex(id);
         }
 
+        // assets
         SpriteComponent(std::string id, bool isAnimated, int numFrames, int speed, 
                         int width, int height, SDL_RendererFlip flip) 
         {
             animated = isAnimated;
             spriteFlip = flip;
 
-            Animation idle = Animation(0, numFrames, speed, width, height);
-            Animation run = Animation(1, numFrames, speed, width, height);
-            Animation attack = Animation(2, numFrames, 100, width, height);
-            Animation hit = Animation(3, numFrames, 500, width, height);
+            if (id == "effect") {
+                Animation idle = Animation(0, numFrames, speed, 18, 30);
+                Animation run = Animation(1, numFrames, speed, 35, 18);
+                Animation attack = Animation(2, numFrames, speed, 35, 18);
+                Animation hit = Animation(3, numFrames, speed, 11, 17);
 
-            animations.emplace("Idle", idle);   
-            animations.emplace("Run", run);
-            animations.emplace("Attack", attack);
-            animations.emplace("Hit", hit);
+                animations.emplace("Idle", idle);   
+                animations.emplace("Run", run);
+                animations.emplace("Attack", attack);
+                animations.emplace("Hit", hit);
 
-            Play("Idle");
+                Play("Idle");
+            }
+
+            if (id == "attack_up" || id == "attack_down") {
+                Animation idle = Animation(0, numFrames, speed, 35, 18);
+                Animation attack = Animation(1, numFrames, speed, 35, 18);
+
+                animations.emplace("Idle", idle);   
+                animations.emplace("Attack", attack);
+
+                Play("Idle");
+            }
+
+            if (id == "skill") {
+                Animation idle = Animation(0, 6, speed, 32, 10);
+                Animation run = Animation(1, 2, speed, 410, 60);
+
+                animations.emplace("Idle", idle);   
+                animations.emplace("Run", run);
+
+                Play("Idle");
+            }
+
+            if (id == "ssss") {
+                Animation idle = Animation(0, 6, speed, 120, 90);
+
+                animations.emplace("Idle", idle);   
+
+                Play("Idle");
+            }
+
+            if (id == "skill2") {
+                Animation idle = Animation(0, 4, speed, 15, 15);
+
+                animations.emplace("Idle", idle);   
+
+                Play("Idle");
+            }
+
+            if (id == "chest") {
+                Animation idle = Animation(0, 12, speed, 48, 48);
+
+                animations.emplace("Idle", idle);   
+
+                Play("Idle");
+            }
+
+            if (id == "sb1") {
+                Animation idle = Animation(0, 6, speed,48, 48);
+
+                animations.emplace("Idle", idle);   
+
+                Play("Idle");
+            }
 
             setTex(id);
         }
