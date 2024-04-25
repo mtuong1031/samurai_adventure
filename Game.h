@@ -36,9 +36,12 @@ class Game
         static SDL_Rect camera;
         static SDL_Rect playerRect;
         static AssetManager* assets;
+        static Mix_Chunk* runSound;
         static Mix_Chunk* hitSound;
         static Mix_Chunk* attackSound;
-        static Mix_Chunk* runSound;
+        static Mix_Chunk* enemy_hit;
+        static Mix_Chunk* main_hit;
+        static Mix_Music* bgm;
         // tạo nhóm cho các thành phần
         enum groupLabels : std::size_t
         {
@@ -58,5 +61,6 @@ class Game
     private:
         int cnt = 0;
         SDL_Window* window;
+
 
 };

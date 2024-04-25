@@ -30,7 +30,7 @@ void AssetManager::CreateEffect(Vector2D pos, Vector2D vel, int range, int speed
 void AssetManager::CreateSkillofPlayer(Vector2D pos, Vector2D vel, int range, int speed, std::string id, SDL_RendererFlip flip, SDL_Rect size) {
     auto& skill(manager->addEntity());
 
-    skill.addComponent<TransformComponent>(pos.x, pos.y, size.h, size.w, 1);
+    skill.addComponent<TransformComponent>(pos.x, pos.y, size.h, size.w, 2);
     skill.addComponent<SpriteComponent>(id, true, 4, 100, size.w, size.h, flip);
     skill.addComponent<ProjectileComponent>(range, speed, vel, id);
     skill.addComponent<ColliderComponent>("ssss");
