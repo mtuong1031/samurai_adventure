@@ -10,8 +10,8 @@ class TransformComponent : public Component
         Vector2D position;
         Vector2D velocity; // tốc độ
 
-        int height = 80;
-        int width = 64;
+        int height = 19;
+        int width = 19;
         int scale = 1;
 
         int speed = 7;
@@ -39,20 +39,6 @@ class TransformComponent : public Component
             width = w;
             scale = s;
         }
-        // float getRectX(std::tring id){
-        //     if (id == "player")
-        //     {
-        //         return position.x;
-        //     }
-        //     return 0;
-        // }
-
-        // float getRectY(std::tring id){
-        //     if (id == "player")
-        //     {
-        //         return position.y;
-        //     }
-        //     return 0;
 
         void init() override {
             velocity.Zero();

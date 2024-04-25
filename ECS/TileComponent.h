@@ -1,9 +1,6 @@
-#ifndef _TilelComponent_h_
-#define _TilelComponent_h_
+#pragma once
 
 #include "ECS.h"
-#include "TransformComponent.h"
-#include "SpriteComponent.h"    
 #include "SDL2/SDL.h"
 
 class TileComponent : public Component{
@@ -19,9 +16,9 @@ class TileComponent : public Component{
             SDL_DestroyTexture(texture);
         }
 
-        TileComponent(int srcX, int srcY, int xpos, int ypos,int tsize, int tscale, const char* path) 
+        TileComponent(int srcX, int srcY, int xpos, int ypos,int tsize, int tscale, std::string id) 
         {
-            texture = TextureManager::LoadTexture(path);
+            texture = Game::assets->GetTexture(id);
 
             position.x = xpos;
             position.y = ypos;
@@ -47,5 +44,3 @@ class TileComponent : public Component{
         }
 
 };
-
-#endif // _TilelComponent_h_

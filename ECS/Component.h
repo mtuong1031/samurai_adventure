@@ -8,3 +8,5 @@
 #include "TileComponent.h"
 #include "ProjectileComponent.h"
 #include "TheEnemies.h"
+#include "TheBosses.h"
+#include "UILabel.h"

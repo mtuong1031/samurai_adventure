@@ -67,8 +67,12 @@ void Map::LoadMap(std::string path, int sizeX, int sizeY)
             mapFile.get(tile);
             if (tile == '2') 
             {
-                Game::assets->CreateEnemies(Vector2D(x * scaledSize, y * scaledSize), Vector2D(0, 0), 500, 1, "enemy");
+                Game::assets->CreateEnemies(Vector2D(x * scaledSize, y * scaledSize), Vector2D(0, 0), 400, 1, "enemy");
                 std::cout << "Create enemy at " << x << " " << y << std::endl;
+            }
+            if (tile == '4') {
+                Game::assets->CreateBoss(Vector2D(x * scaledSize, y * scaledSize), Vector2D(0, 0), 600, 1, "boss", SDL_Rect{0, 0, 125, 110});
+                std::cout << "Create boss at " << x << " " << y << std::endl;
             }
             mapFile.ignore();
         }

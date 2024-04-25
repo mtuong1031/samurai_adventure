@@ -147,7 +147,7 @@ class SpriteComponent : public Component {
             }
 
             if (id == "chest") {
-                Animation idle = Animation(0, 12, speed, 48, 48);
+                Animation idle = Animation(0, 6, speed, 48, 48);
 
                 animations.emplace("Idle", idle);   
 

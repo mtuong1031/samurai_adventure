@@ -1,5 +1,4 @@
-#ifndef _ECS_H_
-#define _ECS_H_
+#pragma once
 
 #include <iostream>
 #include <vector>
@@ -17,7 +16,7 @@ using Group = std::size_t;
 
 //Dùng để lưu trữ các component, 
 inline ComponentID getComponentTypeID() {
-    static ComponentID lastID = 0;
+    static ComponentID lastID = 0u;
     return lastID++;
 }
 
@@ -156,4 +155,3 @@ class Manager
         std::array<std::vector<Entity*>, maxGroups> groupedEntitis;
 };
 
-#endif // _ECS_H_

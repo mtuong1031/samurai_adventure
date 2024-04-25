@@ -17,7 +17,6 @@ class TheEnemies : public Component
         ProjectileComponent *projectile;
 
         Uint32 lastick = 0;
-        std::unordered_map<const char*, int> cooldowns; 
         int currentFrame = 0;
         bool attack_frame = false;
         const char* currentAnimation;
@@ -29,6 +28,10 @@ class TheEnemies : public Component
 
         TheEnemies(Vector2D OriVel, int rng, int spd, Vector2D vel)
             :  original_vector(OriVel), range(rng), speed(spd), velocity(vel)
+        {   }
+
+        TheEnemies(Vector2D OriVel, int rng, int spd, Vector2D vel, int hp)
+            :  original_vector(OriVel), range(rng), speed(spd), velocity(vel), health(hp)
         {   }
 
         ~TheEnemies()
@@ -43,10 +46,6 @@ class TheEnemies : public Component
             
             transform->velocity = velocity;
             isAttacking = false;
-            cooldowns = {
-                {"Attack", 1000},
-                {"Hit", 500}
-            };
         }
 
         Vector2D getDirection(Vector2D target)
@@ -97,7 +96,7 @@ class TheEnemies : public Component
                         transform->velocity.x = 0;
                         transform->velocity.y = 0;
                         // if (SDL_GetTicks() - lastick >= cooldowns["Attack"]) {
-                            sprite->Play("Attack");
+                            sprite->Play("Idle");
                             
                             currentFrame++;
                             lastick = SDL_GetTicks();
@@ -130,8 +129,8 @@ class TheEnemies : public Component
 
             if (hit) {
                 sprite->Play("Hit");
-                transform->position.x -= transform->velocity.x * 2;
-                transform->position.y -= transform->velocity.y * 2;
+                // transform->position.x -= transform->velocity.x * 300;
+                // transform->position.y -= transform->velocity.y * 300;
                 std::cout << "Hit  " << std::endl;
                 hit = false;
             }
@@ -161,7 +160,7 @@ class TheEnemies : public Component
         Vector2D original_vector;
         int range = 0;
         int speed = 1;
-        int attackRange = 100;
+        int attackRange = 0;
         bool inRange = false;
         bool isDead = false;
 };

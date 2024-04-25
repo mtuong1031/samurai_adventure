@@ -52,27 +52,36 @@ class ProjectileComponent : public Component {
                 transform->velocity.y = velocity.y * 0.5;
             } 
             if (id == "effect") {
-                if (index == 1) {
-                    sprite->Play("Hit");
-                } else {
-                    sprite->Play("Hit");
-                }
-                
+                sprite->Play("Idle");
+            }
+            if (id == "block") {
+                sprite->Play("Idle");
             }
             if (id == "skill") {
-                if (index == 1) {
-                    sprite->Play("Idle");
-                }
-                if (index == 2) {
-                    sprite->Play("Hit");
-                }
-            }
-            if (id == "skill_of_player") {
                 sprite->Play("Idle");
-                distance += speed;
-                if (distance > range) {
-                    entity->destroy();
-                }
+                transform->velocity.x = velocity.x * 1;
+                transform->velocity.y = velocity.y * 1;
+            }
+            if (id == "ssss") {
+                sprite->Play("Idle");
+                transform->velocity.x = velocity.x * 3;
+                transform->velocity.y = velocity.y * 3;
+            }
+
+            if (id == "skill2") {
+                sprite->Play("Idle");
+                transform->velocity.x = velocity.x * 3;
+                transform->velocity.y = velocity.y * 3;
+            }
+
+            if (id == "chest") {
+                sprite->Play("Idle");
+            }
+
+            if (id == "sb1") {
+                sprite->Play("Idle");
+                transform->velocity.x = velocity.x ;
+                transform->velocity.y = velocity.y ;
             }
         }
     private:

@@ -185,6 +185,12 @@ void Game::CrateHpBar()
 
     if (lastPLayerHealthWidth > secondLayer.w)
         lastPLayerHealthWidth--;
+    if (secondLayer.w > playerhealth.w) {
+        secondLayer.w = playerhealth.w - 12;
+    }
+    if (secondLayer.w < 12) {
+        secondLayer.w = 12;
+    }
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderFillRect(renderer, &firstLayer);
@@ -358,24 +364,28 @@ void Game::Update()
             assets->CreateSkill(Vector2D(96,768), Vector2D(0, 1), 200, 1, "sb1", SDL_FLIP_NONE, SDL_Rect{0, 0, 48, 48}, 1);
         } else {}
 
+        bool item_check[3];
         switch (boss->getComponent<TheBosses>().health) {
             case 750:
                 assets->CreateItem(Vector2D(336, 912), Vector2D(0, 0), 200, 1, "chest", SDL_Rect{0, 0, 48, 48});
                 assets->CreateItem(Vector2D(576, 912), Vector2D(0, 0), 200, 1, "chest", SDL_Rect{0, 0, 48, 48});
                 assets->CreateItem(Vector2D(576, 1200), Vector2D(0, 0), 200, 1, "chest", SDL_Rect{0, 0, 48, 48});
                 assets->CreateItem(Vector2D(336, 1200), Vector2D(0, 0), 200, 1, "chest", SDL_Rect{0, 0, 48, 48});
+                boss->getComponent<TheBosses>().health -= 3;
                 break;
             case 400:
                 assets->CreateItem(Vector2D(336, 912), Vector2D(0, 0), 200, 1, "chest", SDL_Rect{0, 0, 48, 48});
                 assets->CreateItem(Vector2D(576, 912), Vector2D(0, 0), 200, 1, "chest", SDL_Rect{0, 0, 48, 48});
                 assets->CreateItem(Vector2D(576, 1200), Vector2D(0, 0), 200, 1, "chest", SDL_Rect{0, 0, 48, 48});
                 assets->CreateItem(Vector2D(336, 1200), Vector2D(0, 0), 200, 1, "chest", SDL_Rect{0, 0, 48, 48});
+                boss->getComponent<TheBosses>().health -= 3;
                 break;
             case 100:
                 assets->CreateItem(Vector2D(336, 912), Vector2D(0, 0), 200, 1, "chest", SDL_Rect{0, 0, 48, 48});
                 assets->CreateItem(Vector2D(576, 912), Vector2D(0, 0), 200, 1, "chest", SDL_Rect{0, 0, 48, 48});
                 assets->CreateItem(Vector2D(576, 1200), Vector2D(0, 0), 200, 1, "chest", SDL_Rect{0, 0, 48, 48});
                 assets->CreateItem(Vector2D(336, 1200), Vector2D(0, 0), 200, 1, "chest", SDL_Rect{0, 0, 48, 48});
+                boss->getComponent<TheBosses>().health -= 3;
                 break;
             default:
                 break;
