@@ -3,6 +3,7 @@
 
   Bài tập lớn môn Lập Trình Nâng Cao của Trường Đại học Công Nghệ - Đại Học Quốc Gia Hà Nội
 
+Video trải nghiệm: https://youtu.be/E6C51vkF-bk?si=b6AEPMmaBYV_o1G5
 # Giới thiệu game
 
 Samurai Aventure là tựa game thuộc thể loại Roguelike. Chìm đắm vào hành trình khám phá hầm ngục, cố gắng tiêu diệt tất cả kẻ thù và những con Boss khó nhằn. Hãy cùng mình khám phá tựa game này.
