@@ -74,6 +74,10 @@ void Map::LoadMap(std::string path, int sizeX, int sizeY)
                 Game::assets->CreateBoss(Vector2D(x * scaledSize, y * scaledSize), Vector2D(0, 0), 600, 1, "boss", SDL_Rect{0, 0, 125, 110});
                 std::cout << "Create boss at " << x << " " << y << std::endl;
             }
+            if (tile == '3') {
+                Game::assets->CreateItem(Vector2D(x * scaledSize, y * scaledSize), Vector2D(0, 0), 0, 100, "chest", SDL_Rect{0, 0, 48, 48});
+            }
+
             mapFile.ignore();
         }
     }

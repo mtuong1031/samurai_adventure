@@ -24,12 +24,15 @@ class Game
         bool Menu();
         void HandleEvents();
         void CrateHpBar();
+        void CreateEndGame();
         void Update();
         void Render();
         void Clean();
         bool Running() 
             { return isRunning;}
 
+        static bool endgame_win;
+        static bool endgame_lose;
         static SDL_Renderer* renderer;
         static SDL_Event event;
         static bool isRunning;

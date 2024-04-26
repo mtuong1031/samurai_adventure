@@ -57,6 +57,10 @@ class TheBosses : public Component
 
         void update() override
         {
+             float backLength = sqrt(pow(original_vector.x - transform->position.x, 2) + pow(original_vector.y - transform->position.y, 2));
+            float back_dx = (original_vector.x - transform->position.x) / backLength;
+            float back_dy = (original_vector.y - transform->position.y) / backLength;
+            
 
             if (health > 750) 
                 status = 0;
@@ -124,6 +128,23 @@ class TheBosses : public Component
                 sprite->Play("Idle");
                 inRange = false;
                 isAttacking = false;
+            }
+
+            // Di chuyển về địa chỉ gốc
+            if(transform->position.x != original_vector.x && transform->position.y != original_vector.y && !inRange && !hit)
+            {
+                transform->velocity.x = back_dx*0.1;
+                transform->velocity.y = back_dy*0.1;
+                if (back_dx > 0) {
+                    sprite->spriteFlip = SDL_FLIP_NONE;
+                    sprite->Play("Run");
+                } else if (back_dx < 0) {
+                    sprite->spriteFlip = SDL_FLIP_HORIZONTAL;
+                    sprite->Play("Run");
+                } else
+                {
+                sprite->Play("Idle");
+                }
             }
 
             if (health <= 0)

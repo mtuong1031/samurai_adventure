@@ -19,9 +19,8 @@ class TheEnemies : public Component
         Uint32 lastick = 0;
         int currentFrame = 0;
         bool attack_frame = false;
-        const char* currentAnimation;
 
-        int health = 100;
+        int health = 60;
         int damage = 10;
         bool hit = false;
         bool isAttacking;
