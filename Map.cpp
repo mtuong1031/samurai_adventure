@@ -43,9 +43,9 @@ void Map::LoadMap(std::string path, int sizeX, int sizeY)
 
     mapFile.ignore();
 
-    for(int y = 0; y < sizeY; y++)
+    for (int y = 0; y < sizeY; y++) 
     {
-        for(int x = 0; x < sizeX; x++)
+        for (int x = 0; x < sizeX; x++)
         {
             mapFile.get(tile);
             if(tile == '1')
@@ -54,17 +54,6 @@ void Map::LoadMap(std::string path, int sizeX, int sizeY)
                 tileCollider.addComponent<ColliderComponent>("terrain", x * scaledSize, y * scaledSize,  scaledSize);
                 tileCollider.addGroup(Game::groupColliders);            
             }
-            mapFile.ignore();
-        }
-    }
-
-    mapFile.ignore();
-
-    for (int y = 0; y < sizeY; y++) 
-    {
-        for (int x = 0; x < sizeX; x++)
-        {
-            mapFile.get(tile);
             if (tile == '2') 
             {
                 Game::assets->CreateEnemies(Vector2D(x * scaledSize, y * scaledSize), Vector2D(0, 0), 400, 1, "enemy");

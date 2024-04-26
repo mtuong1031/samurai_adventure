@@ -81,6 +81,7 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
     assets->AddTexture("arrow", "image/arrow.png");
     assets->AddTexture("hp", "image/fire.png");
     assets->AddTexture("enemy", "image/enemy1_ani.png");
+    assets->AddTexture("control", "image/control.png");
 
     assets->AddTexture("effect", "image/skill.png");
     assets->AddTexture("attack_up", "image/tuong_attack_up.png");
@@ -104,6 +105,7 @@ void Game::Init(const char *tiles, int xpos, int ypos, int width, int height, bo
 
     // thực hiện khởi tạo các thành phần của player
     assets->CreatePlayer(Vector2D(1, 300), 200, "player");
+    assets->CreateItem(Vector2D(50, 150), Vector2D(0, 0), 200, 1, "control", SDL_Rect{0, 0, 2, 2});
 }
 
 auto& tiles(manager.getGroup(Game::groupMap));
@@ -495,7 +497,7 @@ void Game::Update()
     bool isSkillofPlayer = players[0]->getComponent<KeyboardControler>().isSkill;
     bool isBlocking = players[0]->getComponent<KeyboardControler>().isBlocking;
     Vector2D skillRect;
-    if (SDL_GetTicks() - players[0]->getComponent<KeyboardControler>().attack_cd >= 25 && isAttack)
+    if (SDL_GetTicks() - players[0]->getComponent<KeyboardControler>().attack_cd >= 50 && isAttack)
     {
         {
             if (flip == SDL_FLIP_HORIZONTAL) 
@@ -508,14 +510,16 @@ void Game::Update()
             players[0]->getComponent<KeyboardControler>().attack_cd = SDL_GetTicks();
         }
     } else {
-        isAttack = false;
-        for (auto& ef : effects) {
-            ef->destroy();
+        if (SDL_GetTicks() - players[0]->getComponent<KeyboardControler>().attack_cd >= 10) {
+            isAttack = false;
+            for (auto& e : effects) {
+            e->destroy();
+            }
         }
     }
 
     Vector2D BulletVel = players[0]->getComponent<KeyboardControler>().BulletVel;
-    if (SDL_GetTicks() - players[0]->getComponent<KeyboardControler>().skill_cd >= 200 && isSkillofPlayer)
+    if (SDL_GetTicks() - players[0]->getComponent<KeyboardControler>().skill_cd >= 250 && isSkillofPlayer)
     {
         if (isSkillofPlayer) {
             if (flip == SDL_FLIP_HORIZONTAL) 
@@ -534,6 +538,21 @@ void Game::Update()
     {
         players[0]->destroy();
         endgame_lose = true;
+    }
+
+    if (players[0]->getComponent<KeyboardControler>().health > players[0]->getComponent<KeyboardControler>().max_health)
+    {
+        players[0]->getComponent<KeyboardControler>().health = players[0]->getComponent<KeyboardControler>().max_health;
+    }
+
+    if (players[0]->getComponent<KeyboardControler>().health < 0)
+    {
+        for (auto& eff : effects) {
+            eff->destroy();
+        }
+        for (auto& s : sssses) {
+            s->destroy();
+        } 
     }
 
     Vector2D bullet_vel(0, 0);
@@ -604,8 +623,9 @@ void Game::Render() {
         i->Draw();
     }
 
-    CrateHpBar();
     CreateEndGame();
+
+    CrateHpBar();
 
     SDL_RenderPresent(renderer);
 }
